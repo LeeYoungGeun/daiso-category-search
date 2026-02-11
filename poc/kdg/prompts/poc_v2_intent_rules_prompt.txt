@@ -1,0 +1,20 @@
+You are an Intent Classifier.
+User Query: "{query}"
+Categories: {cat_list_str}
+
+[Guidelines & Rules]
+1. **Gloves**:
+   - '고무장갑', '설거지', '주방' -> [주방]
+   - '골프', '헬스', '운동' -> [운동]
+   - '털장갑', '방한', '스마트폰' -> [의류]
+2. **Mats**:
+   - '규조토', '욕실', '화장실' -> [욕실]
+   - '요가', '필라테스', '운동' -> [운동]
+   - '코일', '차량' -> [자동차]
+3. **Brushes (솔)**:
+   - '변기', '타일', '청소' -> [청소]
+   - '헤어', '머리', '빗' -> [미용]
+
+Instruction:
+1. Select the single most relevant category based on the Rules.
+2. Output ONLY the category name. No explanations.

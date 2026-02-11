@@ -1,0 +1,70 @@
+id	raw_text	intent_text	expected_doc_ids	expected_category	needs_clarification	notes
+tc_0001	건전지 어디에 있어요?	건전지 건전지 전자기기 전자제품 배터리	doc_0001|doc_0002	전자/디지털	false	Extracted Product + Expanded Keywords
+tc_0002	멀티탭 코너는 몇 번이에요?	멀티탭 멀티탭 전자기기 전선 디지털 전기	doc_0003|doc_0004	전자/디지털	false	Extracted Product + Expanded Keywords
+tc_0003	순간접착제는 어디로 가야 돼요?	순간접착제 순간접착제 접착제 문구 사무용품 접착	doc_0005|doc_0006	문구/사무	false	Extracted Product + Expanded Keywords
+tc_0004	욕실 슬리퍼 찾는데 안 보여요.	욕실 슬리퍼 욕실 슬리퍼 욕실 슬리퍼 욕실용품 실내화	doc_0007|doc_0008	욕실/청소	false	Extracted Product + Expanded Keywords
+tc_0005	다이소 꿀템이라고 하던데, '리들샷' 재고 있나요?	리들샷 리들샷 얼굴 샷 뷰티 스킨케어 피부관리	doc_0009|doc_0010	뷰티/위생	false	Extracted Product + Expanded Keywords
+tc_0006	아이폰 충전 케이블은 어디 쪽에 있나요?	아이폰 충전 케이블 아이폰 충전 케이블 아이폰 충전 케이블 케이블 디지털 핸드폰 용품 충전기	doc_0011|doc_0012	전자/디지털	false	Extracted Product + Expanded Keywords
+tc_0007	포장지랑 편지지는 어디 있어요?	포장지, 편지지 포장지 편지지 포장지 편지지 종이 문구 선물 포장 편지 쓰기	doc_0013|doc_0014	문구/사무	false	Extracted Product + Expanded Keywords
+tc_0008	옷걸이 종류는 어디 모여 있어요?	옷걸이 옷걸이 옷장 걸이 수납용품 정리	doc_0015|doc_0016	수납/정리	false	Extracted Product + Expanded Keywords
+tc_0009	강아지 배변 패드는 2층에 있나요?	배변 패드 배변 패드 애견 패드 애완용품 강아지 고양이	doc_0017|doc_0018	반려동물	false	Extracted Product + Expanded Keywords
+tc_0010	줄자는 공구 쪽에 있나요, 문구 쪽에 있나요?	줄자 줄자 측정 도구 DIY 측정 도구	doc_0019|doc_0020	공구/DIY	false	Extracted Product + Expanded Keywords
+tc_0011	싱크대 물 안 튀게 막아주는 거 있어요?	싱크대 물튐 방지 싱크대 물튐 방지 싱크대 물튐 방지 주방용품 생활용품 방수 물막이	doc_0021|doc_0022	주방/식기	false	Extracted Product + Expanded Keywords
+tc_0012	의자 끌 때 소리 안 나게 끼우는 거 찾는데요.	의자 다리 커버 의자 다리 커버 의자 다리 커버 커버 가구 생활용품 소음방지 긁힘방지	doc_0023|doc_0024	공구/DIY	false	Extracted Product + Expanded Keywords
+tc_0013	새로 이사했는데 문틈으로 바람 들어오는 거 막는 스펀지 같은 거요.	문풍지 문풍지 창문 바람막이 단열재 생활용품	doc_0025|doc_0026	공구/DIY	false	Extracted Product + Expanded Keywords
+tc_0014	화장실 타일 사이에 낀 곰팡이 없애는 젤 있나요?	곰팡이 제거 젤 곰팡이 제거 젤 곰팡이 제거 젤 청소용품 욕실 주방 다용도 곰팡이 방지	doc_0027|doc_0028	욕실/청소	false	Extracted Product + Expanded Keywords
+tc_0015	그... 옷에 핀 보풀 제거하는 기계 있어요?	보풀 제거기 보풀 제거기 옷 제거기 세탁용품 보풀제거	doc_0029|doc_0030	기타	false	Extracted Product + Expanded Keywords
+tc_0016	신발장 냄새 제거하는 탈취제 같은 거 어디 봐요?	탈취제 탈취제 냄새 제거제 방향제 생활용품 탈취 냄새 제거	doc_0031|doc_0032	욕실/청소	false	Extracted Product + Expanded Keywords
+tc_0017	벽에 못 안 박고 액자 걸 수 있는 끈끈이 있어요?	액자 끈끈이 액자 끈끈이 액자 끈끈이 인테리어 접착 고정	doc_0033|doc_0034	공구/DIY	false	Extracted Product + Expanded Keywords
+tc_0018	여행 가는데 화장품 덜어갈 작은 공병들 모아둔 곳이요.	공병 공병 병 생활용품 다용도	doc_0035|doc_0036	기타	false	Extracted Product + Expanded Keywords
+tc_0019	방충망에 구멍 났는데 그거 때우는 스티커 있나요?	방충망 스티커 방충망 스티커 방충망 스티커 생활용품 방충 보수	doc_0037|doc_0038	공구/DIY	false	Extracted Product + Expanded Keywords
+tc_0020	키보드 사이에 먼지 빼는 젤리 같은 거 찾고 있어요?	먼지 제거 젤리 먼지 제거 젤리 먼지 제거 젤리 청소용품 먼지 제거	doc_0039|doc_0040	욕실/청소	false	Extracted Product + Expanded Keywords
+tc_0021	매직블럭(매직스펀지) 큰 거는 없어요?	매직블럭 매직블럭 청소 청소용품 다용도 얼룩제거	doc_0041|doc_0042	욕실/청소	false	Extracted Product + Expanded Keywords
+tc_0022	배수구 거름망 스타킹처럼 된 거요.	배수구 거름망 배수구 거름망 배수구 거름망 주방용품 배수구 청소 필터	doc_0043|doc_0044	주방/식기	false	Extracted Product + Expanded Keywords
+tc_0023	에어프라이어에 까는 종이 호일 어디 있죠?	종이 호일 종이 호일 주방 호일 주방용품 쿠킹호일	doc_0045|doc_0046	주방/식기	false	Extracted Product + Expanded Keywords
+tc_0024	고무장갑 M사이즈는 어디에 걸려 있나요?	고무장갑 고무장갑 주방 장갑 주방용품 청소용품 설거지	doc_0047|doc_0048	욕실/청소	false	Extracted Product + Expanded Keywords
+tc_0025	밀폐용기 중에 유리로 된 것만 모아둔 곳 있어요?	밀폐용기 밀폐용기 주방 용기 주방용품 밀폐	doc_0049|doc_0050	주방/식기	false	Extracted Product + Expanded Keywords
+tc_0026	기름 닦는 키친타월은 휴지 쪽에 있나요, 주방 쪽에 있나요?	키친타월 키친타월 주방 타월 주방용품 청소	doc_0051|doc_0052	주방/식기	false	Extracted Product + Expanded Keywords
+tc_0027	텀블러 닦는 긴 솔 찾아요.	텀블러 솔 텀블러 솔 텀블러 솔 청소용품 주방용품 세척솔	doc_0053|doc_0054	주방/식기	false	Extracted Product + Expanded Keywords
+tc_0028	음식물 쓰레기 봉투도 파나요?	음식물 쓰레기 봉투 음식물 쓰레기 봉투 음식물 쓰레기 봉투 봉투 주방 주방용품 쓰레기 처리	doc_0055|doc_0056	문구/사무	false	Extracted Product + Expanded Keywords
+tc_0029	인덕션 상판 닦는 전용 세제 있나요?	인덕션 상판 세제 인덕션 상판 세제 인덕션 상판 세제 세제 주방 주방용품 청소	doc_0057|doc_0058	주방/식기	false	Extracted Product + Expanded Keywords
+tc_0030	과일 씻을 때 쓰는 베이킹소다는 어디 있어요?	베이킹소다 베이킹소다 주방 세제 청소용품 다용도 탈취 세척	doc_0059|doc_0060	주방/식기	false	Extracted Product + Expanded Keywords
+tc_0031	뽁뽁이(에어캡) 롤로 말려 있는 거 있어요?	에어캡 에어캡 포장 포장재 생활용품 완충재 보호재	doc_0061|doc_0062	기타	false	Extracted Product + Expanded Keywords
+tc_0032	택배 보낼 때 쓰는 박스 테이프 투명한 거요.	박스 테이프 박스 테이프 테이프 포장용품 접착	doc_0063|doc_0064	문구/사무	false	Extracted Product + Expanded Keywords
+tc_0033	다이어리 꾸미는 스티커 모아둔 매대는 어디예요?	다이어리 스티커 다이어리 스티커 다이어리 스티커 문구 꾸미기 장식	doc_0065|doc_0066	문구/사무	false	Extracted Product + Expanded Keywords
+tc_0034	화이트보드 마카랑 지우개 세트로 된 거 있나요?	화이트보드 마카 화이트보드 마카 화이트보드 마카 문구 사무용품 필기구	doc_0067|doc_0068	문구/사무	false	Extracted Product + Expanded Keywords
+tc_0035	제본할 때 쓰는 링 같은 거 파나요?	제본 링 제본 링 링 문구 사무용품 제본	doc_0069|doc_0070	문구/사무	false	Extracted Product + Expanded Keywords
+tc_0036	축의금 봉투 글씨 안 쓰여 있는 걸로 찾는데요.	축의금 봉투 축의금 봉투 봉투 문구 선물용품 축하	doc_0071|doc_0072	문구/사무	false	Extracted Product + Expanded Keywords
+tc_0037	네임펜 얇은 거 말고 굵은 거는요?	네임펜 네임펜 펜 문구 사무용품 필기구	doc_0073|doc_0074	문구/사무	false	Extracted Product + Expanded Keywords
+tc_0038	가위가 잘 안 드는데 여기서 제일 잘 드는 가위 추천해 주세요.	가위 가위 문구 사무용품 학용품 절삭도구	doc_0075|doc_0076	문구/사무	false	Extracted Product + Expanded Keywords
+tc_0039	초강력 자석 있나요?	자석 자석 다용도 문구 사무용품 고정	doc_0077|doc_0078	문구/사무	false	Extracted Product + Expanded Keywords
+tc_0040	서류 정리하는 파일 꽂이 투명한 색깔 있어요?	파일꽂이 파일꽂이 사무실 꽂이 문구 정리 수납	doc_0079|doc_0080	수납/정리	false	Extracted Product + Expanded Keywords
+tc_0041	앞머리 롤(헤어롤) 제일 큰 사이즈 어디 있어요?	헤어롤 헤어롤 헤어 롤 미용 헤어 스타일링	doc_0081|doc_0082	뷰티/위생	false	Extracted Product + Expanded Keywords
+tc_0042	화장 퍼프 대용량으로 든 거 찾아요.	화장 퍼프 화장 퍼프 퍼프 화장 미용소품 화장품	doc_0083|doc_0084	뷰티/위생	false	Extracted Product + Expanded Keywords
+tc_0043	젤 네일 굽는 램프도 파나요?	젤 네일 램프 젤 네일 램프 네일 램프 램프 미용 네일 젤네일 LED	doc_0085|doc_0086	뷰티/위생	false	Extracted Product + Expanded Keywords
+tc_0044	머리끈 검은색 고무줄만 들어있는 거요.	머리끈 머리끈 헤어 끈 액세서리 머리	doc_0087|doc_0088	뷰티/위생	false	Extracted Product + Expanded Keywords
+tc_0045	여행용 샴푸/린스 키트 있나요?	여행용 샴푸/린스 키트 여행용 샴푸/린스 키트 여행 샴푸/린스 키트 세트 여행용품 휴대용	doc_0089|doc_0090	뷰티/위생	false	Extracted Product + Expanded Keywords
+tc_0046	여드름 났을 때 붙이는 패치 어디 있죠?	여드름 패치 여드름 패치 피부 패치 미용 피부관리	doc_0091|doc_0092	뷰티/위생	false	Extracted Product + Expanded Keywords
+tc_0047	발 뒤꿈치 각질 제거하는 돌 같은 거요.	발 각질 제거기 발 각질 제거기 발 각질 제거기 미용 바디 각질 제거	doc_0093|doc_0094	뷰티/위생	false	Extracted Product + Expanded Keywords
+tc_0048	손거울 탁상용으로 세울 수 있는 거 찾아요.	손거울 손거울 거울 미용 휴대용	doc_0095|doc_0096	뷰티/위생	false	Extracted Product + Expanded Keywords
+tc_0049	남자들 쓰는 왁스나 스프레이도 있나요?	왁스 왁스 광택제 청소용품 생활용품 광택	doc_0097|doc_0098	뷰티/위생	false	Extracted Product + Expanded Keywords
+tc_0050	속눈썹 뷰러 고무 리필만 따로 파나요?	속눈썹 뷰러 고무 리필 속눈썹 뷰러 고무 리필 속눈썹 뷰러 리필 뷰러 리필 리필 미용 메이크업 속눈썹 뷰티	doc_0099|doc_0100	뷰티/위생	false	Extracted Product + Expanded Keywords
+tc_0051	자전거 자물쇠 비밀번호 설정되는 거요.	자전거 자물쇠 자전거 자물쇠 자전거 자물쇠 보안용품 도난방지	doc_0101|doc_0102	스포츠/레저	false	Extracted Product + Expanded Keywords
+tc_0052	차량용 핸드폰 거치대 송풍구에 끼우는 거 있나요?	차량용 핸드폰 거치대 차량용 핸드폰 거치대 차량용 거치대 핸드폰 거치대 거치대 차량 핸드폰 디지털 차량용품 핸드폰 용품	doc_0103|doc_0104	전자/디지털	false	Extracted Product + Expanded Keywords
+tc_0053	캠핑 갈 때 쓸 일회용 숯이나 그릴 파나요?	숯 그릴 숯 그릴 그릴 캠핑 주방용품 바베큐	doc_0105|doc_0106	스포츠/레저	false	Extracted Product + Expanded Keywords
+tc_0054	드라이버 세트 정밀 드라이버 포함된 거요.	드라이버 세트 드라이버 세트 드라이버 세트 공구 다용도 수리 DIY	doc_0107|doc_0108	공구/DIY	false	Extracted Product + Expanded Keywords
+tc_0055	실리콘 쏘는 총(코킹건)이랑 실리콘 어디 있어요?	실리콘 코킹건 실리콘 코킹건 코킹건 건 공구 실리콘 접착제 DIY	doc_0109|doc_0110	공구/DIY	false	Extracted Product + Expanded Keywords
+tc_0056	낚시용품 코너가 따로 있나요?	낚시용품 낚시용품 낚시 용품 취미 야외 레저	doc_0111|doc_0112	스포츠/레저	false	Extracted Product + Expanded Keywords
+tc_0057	뜨개질 실이랑 바늘 찾는 중인데요.	뜨개질 실 뜨개질 실 실 취미용품 DIY 털실	doc_0113|doc_0114	기타	false	Extracted Product + Expanded Keywords
+tc_0058	화분에 꽂는 영양제 초록색 그거요.	화분 영양제 화분 영양제 화분 영양제 원예 식물 영양	doc_0115|doc_0116	원예	false	Extracted Product + Expanded Keywords
+tc_0059	페인트 붓이랑 롤러 작은 사이즈 있나요?	페인트 붓 롤러 페인트 붓 롤러 페인트 붓 롤러 롤러 페인트 용품 DIY 페인트칠	doc_0117|doc_0118	공구/DIY	false	Extracted Product + Expanded Keywords
+tc_0060	차 긁힌 데 바르는 컴파운드 같은 거 파나요?	컴파운드 컴파운드 자동차 광택제 차량용품 흠집제거 연마제	doc_0119|doc_0120	차량	false	Extracted Product + Expanded Keywords
+tc_0061	생일 파티 풍선 중에 숫자 풍선 있어요?	숫자 풍선 숫자 풍선 풍선 파티용품 장식 생일 기념일	doc_0121|doc_0122	기타	false	Extracted Product + Expanded Keywords
+tc_0062	아이들 가지고 노는 슬라임 종류 많은 곳이 어디예요?	슬라임 슬라임 장난감 문구 액체괴물 액체	doc_0123|doc_0124	문구/사무	false	Extracted Product + Expanded Keywords
+tc_0063	크리스마스 트리 장식볼 찾는데요.	크리스마스 트리 장식볼 크리스마스 트리 장식볼 크리스마스 트리 장식볼 장식볼 크리스마스 용품 장식	doc_0125|doc_0126	인테리어/데코	false	Extracted Product + Expanded Keywords
+tc_0064	비눗방울 놀이하는 거 큰 거 있나요?	비눗방울 비눗방울 야외 장난감 유아용품 놀이	doc_0127|doc_0128	기타	false	Extracted Product + Expanded Keywords
+tc_0065	할로윈 분장 소품 어디 있나요?	할로윈 분장 소품 할로윈 분장 소품 할로윈 분장 소품 소품 파티용품 코스튬	doc_0129|doc_0130	기타	false	Extracted Product + Expanded Keywords
+tc_0066	파티용 고깔모자랑 폭죽 있나요?	고깔모자 고깔모자 모자 파티용품 장식 머리 장식	doc_0131|doc_0132	의류/패션	false	Extracted Product + Expanded Keywords
+tc_0067	어버이날 카네이션 브로치 조화로 된 거요.	카네이션 브로치 카네이션 브로치 브로치 악세서리 선물 장식	doc_0133|doc_0134	기타	false	Extracted Product + Expanded Keywords
+tc_0068	스케치북이랑 크레파스 유치원생 쓸 만한 거요.	스케치북, 크레파스 스케치북 크레파스 스케치북 크레파스 미술용품 문구류 그림 드로잉	doc_0135|doc_0136	문구/사무	false	Extracted Product + Expanded Keywords
+tc_0069	선물 상자 예쁜 거 파는 코너 좀 알려주세요.	선물 상자 선물 상자 상자 포장용품 선물	doc_0137|doc_0138	문구/사무	false	Extracted Product + Expanded Keywords

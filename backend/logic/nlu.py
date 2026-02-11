@@ -1,0 +1,150 @@
+
+import os
+import json
+import uuid
+import time
+import datetime
+import asyncio
+from typing import List, Dict
+from dotenv import load_dotenv
+from .schemas import NLUResponse, Intent, NLUSlots
+from .prompts import SYSTEM_PROMPT_V1, TAIL_QUESTION_PROMPT, AUX_PROMPT_KEYWORDS
+
+load_dotenv()
+
+_client = None
+MODEL_NAME = "gemini-1.5-flash"
+
+def get_client():
+    global _client
+    if _client is None:
+        from google import genai
+        from google.genai import types
+        api_key = os.getenv("GEMINI_API_KEY")
+        _client = genai.Client(api_key=api_key)
+    return _client
+
+def log_debug(msg):
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+    print(f"[{timestamp}] {msg}")
+    try:
+        with open("nlu_debug.log", "a", encoding="utf-8") as f:
+            f.write(f"[{timestamp}] {msg}\n")
+    except:
+        pass
+
+async def analyze_text(text: str, history: List[Dict[str, str]] = []) -> NLUResponse:
+    request_id = str(uuid.uuid4())
+    start_time = time.time()
+    
+    log_debug(f"[{request_id}] Analyzing: {text} | History: {len(history)} turns")
+
+    # Format History
+    history_text = ""
+    if history:
+        history_text = "## Conversation History\n"
+        for turn in history:
+            role = turn["role"]
+            content = turn["text"]
+            history_text += f"{role}: {content}\n"
+    
+    try:
+        from google.genai import types
+        
+        client = get_client()
+        
+        # Combine System Prompt + History + Current Input
+        final_prompt = f"{history_text}\nUser's Current Input: {text}"
+        
+        # Async call with new API
+        response = await asyncio.wait_for(
+            asyncio.to_thread(
+                client.models.generate_content,
+                model=MODEL_NAME,
+                contents=final_prompt,
+                config=types.GenerateContentConfig(
+                    system_instruction=SYSTEM_PROMPT_V1,
+                    response_mime_type="application/json",
+                    temperature=0.1
+                )
+            ),
+            timeout=5.0
+        )
+        
+        latency_ms = int((time.time() - start_time) * 1000)
+        
+        usage = {"prompt_tokens": 0, "completion_tokens": 0}
+        if hasattr(response, "usage_metadata") and response.usage_metadata:
+             usage["prompt_tokens"] = response.usage_metadata.prompt_token_count or 0
+             usage["completion_tokens"] = response.usage_metadata.candidates_token_count or 0
+
+        response_text = response.text or ""
+        data = json.loads(response_text)
+        
+        intent_val = data.get("intent", "UNSUPPORTED")
+        if intent_val not in Intent.__members__:
+            intent_val = "UNSUPPORTED"
+            
+        return NLUResponse(
+            request_id=request_id,
+            intent=Intent[intent_val],
+            slots=NLUSlots(**data.get("slots", {})),
+            needs_clarification=data.get("needs_clarification", False),
+            latency_ms=latency_ms,
+            token_usage=usage
+        )
+
+    except Exception as e:
+        latency_ms = int((time.time() - start_time) * 1000)
+        log_debug(f"[{request_id}] Error: {e}")
+        return NLUResponse(
+            request_id=request_id,
+            intent=Intent.UNSUPPORTED,
+            slots=NLUSlots(),
+            needs_clarification=False,
+            generated_question=f"Error: {str(e)}",
+            latency_ms=latency_ms
+        )
+
+async def generate_tail_question(context: str, slots: dict, db_context: str = "") -> str:
+    try:
+        from google.genai import types
+        
+        client = get_client()
+        
+        formatted_prompt = TAIL_QUESTION_PROMPT.format(
+            context=context,
+            slots=json.dumps(slots, ensure_ascii=False),
+            db_context=db_context
+        )
+        
+        response = await asyncio.to_thread(
+            client.models.generate_content,
+            model=MODEL_NAME,
+            contents=formatted_prompt
+        )
+        return (response.text or "").strip()
+    except Exception:
+        return "자세히 말씀해 주시면 찾아드릴게요."
+
+async def infer_product_keywords(text: str) -> list[str]:
+    try:
+        from google.genai import types
+        
+        client = get_client()
+        prompt = AUX_PROMPT_KEYWORDS.format(text=text)
+        
+        response = await asyncio.to_thread(
+            client.models.generate_content,
+            model=MODEL_NAME,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json"
+            )
+        )
+        response_text = response.text or "[]"
+        keywords = json.loads(response_text)
+        if isinstance(keywords, list): return keywords
+        return []
+    except:
+        return []

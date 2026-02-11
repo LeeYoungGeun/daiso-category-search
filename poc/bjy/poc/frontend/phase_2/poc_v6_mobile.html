@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Search-Roca Navi (PoC v6 B1/B2)</title>
+    <!-- Import Map Data -->
+    <script src="./poc_v6_map_data.js?v=20260129_5"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: black;
+            font-family: 'Pretendard', sans-serif;
+        }
+
+        /* --- AR Mode Styles --- */
+        #ar-view {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        #camera-feed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
+        }
+
+        #ar-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- Map Mode Styles --- */
+        #map-view {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: #fff;
+            display: none;
+            z-index: 20;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #map-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #map-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        /* Markers */
+        .map-marker {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            z-index: 25;
+            animation: bounce 1s infinite;
+        }
+
+        .marker-start {
+            background-color: #3498db;
+        }
+
+        .marker-end {
+            background-color: #d63031;
+        }
+
+        .marker-transit {
+            background-color: #e67e22;
+        }
+
+        .marker-label {
+            position: absolute;
+            top: -40px;
+            /* Slightly higher for visibility */
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            /* Darker bg */
+            color: #ffeb3b;
+            /* Yellow text for emphasis */
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: bold;
+            white-space: nowrap;
+            display: block;
+            /* Always visible */
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* Triangle for label */
+        .marker-label::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 5px 5px 0;
+            border-style: solid;
+            border-color: rgba(0, 0, 0, 0.9) transparent transparent transparent;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+            }
+
+            50% {
+                transform: translate(-50%, -50%) scale(1.2);
+            }
+        }
+
+        /* --- Common UI --- */
+        #top-info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            padding: 16px;
+            border-radius: 12px;
+            color: white;
+            z-index: 100;
+        }
+
+        h2 {
+            font-size: 20px;
+            margin: 0;
+            color: #ffeb3b;
+        }
+
+        p {
+            font-size: 14px;
+            margin: 4px 0 0;
+            color: #ddd;
+        }
+
+        .badge-floor {
+            display: inline-block;
+            background: #e67e22;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+
+        #controls {
+            position: absolute;
+            bottom: 30px;
+            width: 100%;
+            text-align: center;
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        button {
+            background: #2d3436;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 12px 20px;
+            border-radius: 24px;
+            font-size: 15px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            backdrop-filter: blur(4px);
+        }
+
+        button.active {
+            background: #d63031;
+            border-color: #d63031;
+        }
+
+        /* Floor Tabs inside Map View */
+        #floor-tabs {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 101;
+            display: flex;
+            gap: 4px;
+            display: none;
+            /* Only in map mode */
+        }
+
+        .floor-tab {
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: 1px solid white;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .floor-tab.active {
+            background: #2ecc71;
+            color: black;
+            font-weight: bold;
+            border: none;
+        }
+
+        #arrow-display {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #arrow {
+            width: 200px;
+            height: 200px;
+            filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.5));
+            transition: transform 0.1s linear;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="top-info">
+        <h2 id="target-name">Loading...</h2>
+        <p id="target-detail">위치 확인 중</p>
+    </div>
+
+    <!-- Mode 1: AR View -->
+    <div id="ar-view">
+        <video id="camera-feed" autoplay playsinline muted></video>
+        <div id="ar-overlay">
+            <div id="arrow-display">
+                <svg id="arrow" viewBox="0 0 100 100" fill="none">
+                    <circle cx="50" cy="50" r="45" stroke="white" stroke-width="2" stroke-opacity="0.5" />
+                    <!-- Needle -->
+                    <path d="M50 10 L65 50 L35 50 Z" fill="#ffeb3b" />
+                    <path d="M50 15 L60 50 L50 90 L40 50 Z" fill="rgba(255, 255, 255, 0.2)" />
+                    <circle cx="50" cy="50" r="5" fill="#d63031" />
+                </svg>
+            </div>
+            <div style="text-align: center; color: white; margin-bottom: 100px; font-size: 14px;">
+                <span id="debug-info">폰을 8자로 움직이세요</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mode 2: Map View -->
+    <div id="map-view">
+        <div id="floor-tabs">
+            <div class="floor-tab" onclick="switchMap('B1')" id="tab-B1">B1</div>
+            <div class="floor-tab" onclick="switchMap('B2')" id="tab-B2">B2</div>
+        </div>
+        <div id="map-container">
+            <div style="position: relative; display: inline-block;">
+                <img id="map-image" src="" alt="Store Map">
+                <!-- Markers Injected Here -->
+                <div id="markers-layer"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="controls">
+        <button id="btn-ar" class="active" onclick="setMode('ar')">📷 AR</button>
+        <button id="btn-map" onclick="setMode('map')">🗺️ 지도</button>
+    </div>
+
+    <script>
+        // --- State ---
+        const params = new URLSearchParams(window.location.search);
+        let currentMode = 'ar';
+        let target = null;
+        let userFloor = "B1"; // Fixed User Location for PoC
+        let viewingFloor = "B1"; // Currently displayed map floor
+        let startLocation = null; // Defined by kiosk
+
+        // --- Init ---
+        function init() {
+            const nameParam = params.get('name') || "";
+            const shelfParam = params.get('shelf');
+            const startParam = params.get('start') || "main";
+
+            // 1. Resolve Target
+            if (shelfParam && mapData.shelves[shelfParam]) {
+                target = mapData.shelves[shelfParam];
+                target.name = nameParam || target.section;
+            } else {
+                target = findProductLocation(nameParam);
+                target.name = nameParam || target.section || "알 수 없는 상품";
+            }
+
+            // 2. Resolve Start Location (Entrance)
+            if (mapData.floors[userFloor].entrances && mapData.floors[userFloor].entrances[startParam]) {
+                startLocation = mapData.floors[userFloor].entrances[startParam];
+            } else {
+                startLocation = mapData.floors[userFloor].entrance; // fallback
+            }
+
+            // 3. Set UI Info
+            document.getElementById('target-name').innerText = target.name;
+            document.getElementById('target-detail').innerHTML =
+                `<span class="badge-floor">${target.floor}</span> ${target.section} (${target.id})`;
+
+            // 4. Default View Floor -> Target Floor
+            viewingFloor = target.floor;
+            updateFloorTabs();
+
+            // 5. Start Sensors
+            startCamera();
+            startCompass();
+
+            // 6. Render Map
+            renderMap(viewingFloor);
+        }
+
+        // --- UI Logic ---
+        window.setMode = (mode) => {
+            currentMode = mode;
+            if (mode === 'ar') {
+                document.getElementById('ar-view').style.display = 'flex';
+                document.getElementById('map-view').style.display = 'none';
+                document.getElementById('floor-tabs').style.display = 'none';
+                document.getElementById('btn-ar').classList.add('active');
+                document.getElementById('btn-map').classList.remove('active');
+            } else {
+                document.getElementById('ar-view').style.display = 'none';
+                document.getElementById('map-view').style.display = 'flex';
+                document.getElementById('floor-tabs').style.display = 'flex';
+                document.getElementById('btn-ar').classList.remove('active');
+                document.getElementById('btn-map').classList.add('active');
+                // Re-render map to be safe
+                renderMap(viewingFloor);
+            }
+        };
+
+        window.switchMap = (floor) => {
+            viewingFloor = floor;
+            updateFloorTabs();
+            renderMap(floor);
+        }
+
+        function updateFloorTabs() {
+            document.querySelectorAll('.floor-tab').forEach(el => el.classList.remove('active'));
+            const tab = document.getElementById(`tab-${viewingFloor}`);
+            if (tab) tab.classList.add('active');
+        }
+
+        // --- Map Rendering ---
+        function renderMap(floor) {
+            const floorData = mapData.floors[floor];
+            if (!floorData) return;
+
+            document.getElementById('map-image').src = floorData.map;
+
+            const container = document.getElementById('markers-layer');
+            container.innerHTML = ''; // Clear
+
+            // 1. Render Entrance (Start for that floor)
+            if (floorData.entrance) {
+                // Determine WHICH entrance to show?
+                // If User is on this floor, show THEIR start location.
+                // If viewing other floor, show MAIN entrance or all? 
+                // For simplicity, if user is on this floor, show actual start.
+                let ent = (userFloor === floor && startLocation) ? startLocation : floorData.entrance;
+
+                const label = (userFloor === floor) ? "현위치 (출발)" : `${floor} 입구`;
+                container.appendChild(createMarker('marker-start', ent.x, ent.y, label));
+            }
+
+            // 2. Render Target (If on this floor)
+            if (target.floor === floor) {
+                // **Key Feature**: Display ID and Name on Map
+                const labelText = `${target.id}\n${target.name}`;
+                container.appendChild(createMarker('marker-end', target.x, target.y, labelText));
+            }
+            // 3. Render Transit (If Target is DIFFERENT floor)
+            else {
+                if (mapData.floors[floor].transits && mapData.floors[floor].transits[target.floor]) {
+                    const transit = mapData.floors[floor].transits[target.floor];
+                    container.appendChild(createMarker('marker-transit', transit.x, transit.y, transit.label));
+                }
+            }
+        }
+
+        function createMarker(cls, x, y, text) {
+            const div = document.createElement('div');
+            div.className = `map-marker ${cls}`;
+            div.style.left = x + '%';
+            div.style.top = y + '%';
+            if (text) {
+                const label = document.createElement('div');
+                label.className = 'marker-label';
+                label.innerText = text; // Supports \n for newlines via CSS if white-space: pre-wrap, but simple helps.
+                div.appendChild(label);
+            }
+            return div;
+        }
+
+        // --- AR / Compass Logic ---
+        let lastHeading = 0;
+
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+                document.getElementById('camera-feed').srcObject = stream;
+            } catch (e) {
+                console.log(e);
+            }
+        }
+
+        function startCompass() {
+            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                DeviceOrientationEvent.requestPermission().then(s => {
+                    if (s === 'granted') window.addEventListener('deviceorientation', handleOrientation);
+                });
+            } else {
+                window.addEventListener('deviceorientation', handleOrientation);
+            }
+        }
+
+        function handleOrientation(e) {
+            let heading = e.webkitCompassHeading || ((360 - e.alpha) % 360);
+            if (!heading) return;
+
+            // Smooth
+            let diff = heading - lastHeading;
+            if (diff > 180) diff -= 360;
+            if (diff < -180) diff += 360;
+            heading = (lastHeading + diff * 0.1 + 360) % 360;
+            lastHeading = heading;
+
+            let effectiveTarget = null;
+            let msg = "";
+
+            if (target.floor === userFloor) {
+                effectiveTarget = target;
+                msg = `목표: ${target.section} (${Math.round(heading)}°)`;
+            } else {
+                // Transit Logic
+                if (mapData.floors[userFloor].transits && mapData.floors[userFloor].transits[target.floor]) {
+                    effectiveTarget = mapData.floors[userFloor].transits[target.floor];
+                    msg = `이동: ${target.floor}행 계단 안내 (${Math.round(heading)}°)`;
+                } else {
+                    effectiveTarget = target;
+                    msg = "다른 층입니다.";
+                }
+            }
+
+            const tx = effectiveTarget.ar_x || 0;
+            const ty = effectiveTarget.ar_y || 10;
+
+            // Calculate relative to Start Location (User's Origin)
+            const sx = (startLocation && startLocation.ar_x) ? startLocation.ar_x : 0;
+            const sy = (startLocation && startLocation.ar_y) ? startLocation.ar_y : 0;
+
+            const dx = tx - sx;
+            const dy = ty - sy;
+            const bearing = (Math.atan2(dx, dy) * 180 / Math.PI + 360) % 360;
+            const rotation = (bearing - heading + 360) % 360;
+
+            document.getElementById("arrow").style.transform = `rotate(${rotation}deg)`;
+            if (currentMode === 'ar') {
+                document.getElementById("debug-info").innerText = msg;
+            }
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

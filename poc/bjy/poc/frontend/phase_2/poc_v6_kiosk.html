@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search-Roca Kiosk (PoC v6)</title>
+    <script src="./poc_v6_map_data.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: 'Pretendard', sans-serif;
+            text-align: center;
+            padding: 50px;
+            background-color: #f8f9fa;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Config Box for Ngrok */
+        .config-box {
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            text-align: left;
+        }
+
+        .config-box input,
+        .config-box select {
+            width: 70%;
+            padding: 8px;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .config-box button {
+            padding: 8px 12px;
+            font-size: 14px;
+            background: #ffc107;
+            color: black;
+            border: none;
+            cursor: pointer;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .main-input {
+            padding: 15px;
+            font-size: 18px;
+            width: 60%;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+        }
+
+        .main-btn {
+            padding: 15px 30px;
+            font-size: 18px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .main-btn:hover {
+            background: #0056b3;
+        }
+
+        #result-area {
+            display: none;
+            margin-top: 30px;
+            border-top: 1px solid #eee;
+            padding-top: 30px;
+        }
+
+        #qrcode {
+            margin: 20px auto;
+            width: 200px;
+            height: 200px;
+        }
+
+        .info-text {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #555;
+        }
+
+        .highlight {
+            color: #d63031;
+            font-weight: bold;
+            font-size: 24px;
+        }
+
+        .floor-tag {
+            display: inline-block;
+            background: #2d3436;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .helper-links {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #888;
+        }
+
+        .helper-links span {
+            cursor: pointer;
+            text-decoration: underline;
+            margin: 0 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>🔍 상품 찾기 키오스크 (PoC v6)</h1>
+
+        <!-- Config Box -->
+        <div class="config-box">
+            <strong>⚙️ 키오스크 설정</strong><br>
+
+            <div style="margin-top:10px;">
+                <label>1. Ngrok URL:</label><br>
+                <input type="text" id="host-url" placeholder="https://xxxx.ngrok-free.app">
+            </div>
+
+            <div style="margin-top:10px;">
+                <label>2. 현재 키오스크 위치:</label><br>
+                <select id="kiosk-loc">
+                    <option value="main">B1 정문 (Main)</option>
+                    <option value="sub">B1 후문 (Sub)</option>
+                </select>
+                <button onclick="saveConfig()" style="margin-left: 5px;">설정 저장</button>
+            </div>
+        </div>
+
+        <p>찾으시는 상품을 입력해주세요.</p>
+
+        <div class="search-box">
+            <input type="text" class="main-input" id="product-input" placeholder="예: 샴푸, 냄비, 채반"
+                onkeypress="if(event.keyCode==13) generateQR()">
+            <button class="main-btn" onclick="generateQR()">위치 안내받기</button>
+        </div>
+
+        <div class="helper-links">
+            추천 검색어:
+            <span onclick="setKeyword('샴푸')">샴푸</span>
+            <span onclick="setKeyword('냄비')">냄비</span>
+            <span onclick="setKeyword('채반')">채반</span>
+            <span onclick="setKeyword('볼펜')">볼펜</span>
+        </div>
+
+        <div id="result-area">
+            <div id="location-info">
+                <span id="floor-badge" class="floor-tag">B1</span>
+                <div class="info-text"><span id="product-name" class="highlight">상품명</span>의 위치는</div>
+                <div class="info-text"><span id="section-name" class="highlight">매대번호</span> 입니다.</div>
+                <p style="color: #666; font-size: 16px;">모바일로 <b>지도 보기 & AR 네비게이션</b>을 시작하려면 QR코드를 스캔하세요.</p>
+            </div>
+
+            <div id="qrcode"></div>
+
+            <p id="url-preview" style="font-size: 12px; color: #aaa; margin-top: 10px;"></p>
+        </div>
+    </div>
+
+    <script>
+        // Init Config
+        let currentHost = localStorage.getItem('ngrok_host') || "http://localhost:8000";
+        let currentKioskLoc = localStorage.getItem('kiosk_loc') || "main";
+
+        document.getElementById('host-url').value = currentHost;
+        document.getElementById('kiosk-loc').value = currentKioskLoc;
+
+        function saveConfig() {
+            const urlVal = document.getElementById('host-url').value.trim();
+            const locVal = document.getElementById('kiosk-loc').value;
+
+            if (urlVal) {
+                currentHost = urlVal.replace(/\/$/, "");
+                localStorage.setItem('ngrok_host', currentHost);
+            }
+
+            if (locVal) {
+                currentKioskLoc = locVal;
+                localStorage.setItem('kiosk_loc', currentKioskLoc);
+            }
+
+            alert("설장이 저장되었습니다. \n주소: " + currentHost + "\n위치: " + (locVal === 'main' ? '정문' : '후문'));
+        }
+
+        function setKeyword(word) {
+            document.getElementById('product-input').value = word;
+            generateQR();
+        }
+
+        function generateQR() {
+            const inputName = document.getElementById('product-input').value.trim();
+            if (!inputName) {
+                alert("상품명을 입력해주세요.");
+                return;
+            }
+
+            // Find Location (Mock)
+            const locationData = findProductLocation(inputName);
+
+            // Build URL with params
+            // If B1, pass 'start' param based on kiosk loc. If B2, start varies? 
+            // Usually Kiosk is fixed on B1.
+            let startParam = "";
+            if (currentKioskLoc === "sub") {
+                startParam = "&start=sub";
+            }
+
+            const mobileUrl = `${currentHost}/poc_v6_mobile.html?name=${encodeURIComponent(inputName)}&shelf=${locationData.id}${startParam}`;
+
+            // Update UI
+            document.getElementById('product-name').innerText = inputName;
+            document.getElementById('section-name').innerText = `${locationData.section} (${locationData.id})`;
+            document.getElementById('floor-badge').innerText = locationData.floor;
+            document.getElementById('url-preview').innerText = mobileUrl;
+
+            document.getElementById('result-area').style.display = 'block';
+
+            // Generate QR
+            const qrContainer = document.getElementById("qrcode");
+            qrContainer.innerHTML = "";
+            new QRCode(qrContainer, {
+                text: mobileUrl,
+                width: 200,
+                height: 200,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+    </script>
+</body>
+
+</html>

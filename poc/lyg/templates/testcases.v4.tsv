@@ -1,0 +1,21 @@
+id	raw_text	intent_text	bm25_query_text	expected_doc_ids	expected_category	needs_clarification	notes
+tc_0001	건전지 어디에 있어요?	건전지	건전지 배터리 AA	battery_aa|battery_aaa	전자/디지털	false	AA/AAA 혼동 허용
+tc_0002	멀티탭 코너는 몇 번이에요?	멀티탭	멀티탭 콘센트 연장선	power_strip|extension_cord	전자/디지털	false	
+tc_0003	순간접착제는 어디로 가야 돼요?	순간접착제	순간접착제 접착제 본드	super_glue	문구/사무	false	
+tc_0004	욕실 슬리퍼 찾는데 안 보여요.	욕실 슬리퍼	욕실 슬리퍼 욕실화 미끄럼방지	bath_slippers	욕실/청소	false	
+tc_0005	욕실 매트 어디있어?	욕실 매트	욕실 매트 발매트 흡수 미끄럼방지	bath_mat|bath_mat_large|bath_mat_small	욕실/청소	false	요가/필라테스 매트와 혼동 위험
+tc_0006	요가 매트 있어요?	요가 매트	요가 매트 운동매트 홈트	yoga_mat|yoga_mat_large|yoga_mat_small	스포츠/레저	false	
+tc_0007	필라테스 매트 찾는중	필라테스 매트	필라테스 매트 운동매트 요가	pilates_mat|pilates_mat_large|pilates_mat_small	스포츠/레저	false	
+tc_0008	발매트 있나요? 욕실에 까는거	욕실 매트	발매트 욕실 흡수 미끄럼방지	bath_mat|bath_mat_large|bath_mat_small	욕실/청소	false	발매트=욕실매트로 의도
+tc_0009	발매트 현관용	현관 매트	현관 매트 발매트 먼지 제거	door_mat	생활/잡화	false	
+tc_0010	싱크대 앞 매트	주방 매트	주방 매트 싱크대 발매트	kitchen_mat	주방/식품	false	
+tc_0011	욕실 청소 세정제	욕실 세정제	욕실 청소 세정제 곰팡이 제거	bath_cleaner	욕실/청소	false	
+tc_0012	변기 청소솔	변기솔	변기솔 변기 청소 브러시	toilet_brush	욕실/청소	false	
+tc_0013	손 씻는 비누	핸드워시	핸드워시 손세정 비누	hand_soap	욕실/청소	false	
+tc_0014	포장 테이프	테이프	투명테이프 포장 테이프	tape	문구/사무	false	
+tc_0015	접착제 풀	풀	풀 스틱풀 접착제	glue_stick	문구/사무	false	
+tc_0016	충전 케이블	USB 케이블	USB 케이블 충전 케이블	usb_cable	전자/디지털	false	
+tc_0017	휴지 있어요?	휴지	화장지 두루마리 휴지	tissue	욕실/청소	false	
+tc_0018	욕실 방향제	방향제	화장실 욕실 방향제	deodorizer	욕실/청소	false	
+tc_0019	배수구 냄새 제거	배수구 클리너	배수구 청소 악취 제거	drain_cleaner	욕실/청소	false	
+tc_0020	매트 같은 거(애매)		매트			true	clarify 케이스

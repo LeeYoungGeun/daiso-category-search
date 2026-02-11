@@ -1,0 +1,89 @@
+id	raw_text	intent_text	bm25_query_text	expected_doc_ids	expected_category	needs_clarification	notes	trap_keywords
+tc_3000	화장실 문앞 깔개 어디 있어요?	욕실/화장실 문앞 매트	화장실 문앞 깔개 욕실 발매트 미끄럼방지 흡수 규조토 러그 발판 변기 앞	bath_mat,diatomite_mat,bath_rug	욕실/청소	false	ambiguous_top5	변기 앞
+tc_3001	사과 칼 주세요	과도	사과 칼 과도 과일 칼 주방 칼 애플	fruit_knife	주방/식품	false	exact_disambiguated_with_apple_token	애플
+tc_3002	사과 깎는 작은 칼 있어요?	과도	사과 깎는 칼 과도 과일 칼 작은 칼	fruit_knife	주방/식품	false	desc/syn	
+tc_3003	사과 케이스 주세요	애플폰 케이스	케이스 애플폰 케이스 아이폰 케이스 폰케이스 iphone 사과	iphone_case	전자/디지털	false	brand_disambiguated	사과
+tc_3004	아이폰 케이스 있어요?	애플폰 케이스	아이폰 케이스 애플폰 케이스 폰케이스 iphone case	iphone_case	전자/디지털	false	exact	
+tc_3005	사과 케이스 있나요?	애플폰 케이스	케이스 애플폰 케이스 아이폰 케이스 폰케이스 iphone 사과	iphone_case	전자/디지털	false	ambiguous->assume_iphone_case	사과
+tc_3006	애플 칼 주세요	애플폰 케이스	애플 애플폰 케이스 아이폰 케이스 폰케이스 iphone 칼	iphone_case	전자/디지털	false	ambiguous->force_iphone_case	칼
+tc_3007	애플 감싸는거 주세요	애플폰 케이스	애플 감싸는거 케이스 애플폰 케이스 아이폰 케이스 폰케이스 iphone	iphone_case	전자/디지털	false	ambiguous->assume_iphone_case	
+tc_3031	사과 껍질 깎는 필러 있어요?	과일 필러	사과 껍질 필러 과일 필러 껍질 제거	fruit_peeler	주방/식품	false	desc	
+tc_3032	과일필러 어디 있어요?	과일 필러	과일필러 과일 필러 필러 감자	fruit_peeler	주방/식품	false	exact	감자
+tc_3033	사과 자르는 커터 같은거 있어요?	사과 슬라이서	사과 커터 사과 슬라이서 사과 자르기 과일 커터	apple_slicer	주방/식품	false	desc/syn	
+tc_3034	사과 슬라이서 주세요	사과 슬라이서	사과 슬라이서 사과 커터	apple_slicer	주방/식품	false	exact	
+tc_3035	과도 세트 어디에요?	과도 세트	과도 세트 과일 칼 세트 사과 칼 세트	fruit_knife_set	주방/식품	false	exact	
+tc_3036	도마 어디 있어요?	도마	도마 주방 도마	cutting_board	주방/식품	false	exact	
+tc_3037	식도 있어요?	식도	식도 주방 칼 요리 칼	chef_knife	주방/식품	false	exact	
+tc_3038	사과 보관 케이스 주세요	과일 보관 케이스	사과 보관 과일 보관 과일 보관 통 케이스	fruit_storage_box	주방/식품	false	disambiguated_from_phone	케이스
+tc_3039	아이폰 필름 어디 있어요?	액정 보호필름	아이폰 필름 액정 보호필름 강화유리	screen_protector	전자/디지털	false	exact	
+tc_3040	무선충전기 있어요?	무선 충전기	무선충전기 무선 충전기 고속 무선충전 패드	wireless_charger	전자/디지털	false	typo	
+tc_3041	핸드폰 케이스 중에 아이폰꺼 있어요?	애플폰 케이스	핸드폰 케이스 아이폰 케이스 애플폰 케이스 폰케이스 iphone	iphone_case	전자/디지털	false	desc	
+tc_3042	아이폰용 폰케이스 어디 있어요?	애플폰 케이스	아이폰용 폰케이스 아이폰 케이스 애플폰 케이스 iphone	iphone_case	전자/디지털	false	exact	
+tc_3043	아이폰케이스 투명한거 있나요?	애플폰 케이스	아이폰케이스 투명 케이스 아이폰 케이스 애플폰 케이스 폰케이스	iphone_case	전자/디지털	false	desc	
+tc_3044	아이폰 하드 케이스 있어요?	애플폰 케이스	아이폰 하드 케이스 아이폰 케이스 애플폰 케이스 폰케이스	iphone_case	전자/디지털	false	desc	
+tc_3045	아이폰 실리콘 케이스 찾아요	애플폰 케이스	아이폰 실리콘 케이스 아이폰 케이스 애플폰 케이스 폰케이스	iphone_case	전자/디지털	false	desc	
+tc_3046	아이폰 맥세이프 케이스 있나요?	애플폰 케이스	아이폰 맥세이프 케이스 magsafe 아이폰 케이스 애플폰 케이스	iphone_case	전자/디지털	false	feature	
+tc_3047	애플 정품 케이스 있어요?	애플폰 케이스	애플 정품 케이스 아이폰 케이스 애플폰 케이스 폰케이스	iphone_case	전자/디지털	false	brand_short	
+tc_3048	아이폰 14 프로 케이스 주세요	애플폰 케이스	아이폰 14 프로 케이스 아이폰 케이스 애플폰 케이스 폰케이스 iphone	iphone_case	전자/디지털	false	model_variant	
+tc_3049	아이폰15pro 케이스 있나요?	애플폰 케이스	아이폰15pro 케이스 아이폰 15 프로 케이스 애플폰 케이스 폰케이스 iphone	iphone_case	전자/디지털	false	typo/model	
+tc_3050	아이폰케 있나요?	애플폰 케이스	아이폰케 아이폰 케이스 애플폰 케이스 폰케이스	iphone_case	전자/디지털	false	typo	
+tc_4001	투명색 수납 틀 있어요?	투명 수납 트레이	투명색 수납 틀 수납함 수납장 서랍 서랍장 트레이 정리함 투명케이스 빵틀 케이스	transparent_multi_storage_tray_m	생활/정리	false	trap_keywords_bangtle_case	빵틀,케이스
+tc_4002	딸기맛 과자 있어요?	딸기맛 과자	딸기맛 과자 딸기향 과일 딸기 제과 산도 샌드 쿠키 딸기모양 음료	strawberry_crown_sando	식품/간식	false	trap_keywords_shape_drink	딸기모양,음료
+tc_4003	욕실용 칫솔 꽂이 밑에 구멍 있는거 있어요?	물빠짐 칫솔꽂이	욕실 칫솔 꽂이 칫솔꽂이 물빠짐 구멍 배수 거치대 위생 배수구 청소솔꽂이	toothbrush_holder_drain	욕실/위생	false	trap_keywords_drain_cleaner_holder	배수구,청소솔꽂이
+tc_4004	안경 넣는 보관함 있어요?	안경 케이스/안경집	안경 보관함 안경집 안경 케이스 하드케이스 선글라스 보호 수납 안경점 안대	glasses_case_hard	패션/잡화	false	trap_keywords_store_sleepmask	안경점,안대
+tc_4005	마우스 앞에 놓는 손목 보호대 주세요	마우스 손목 받침대	마우스 손목 보호대 손목보호 받침 패드 가드 인체공학 컴퓨터 쥐 쥐덫 발목보호대	mouse_wrist_rest_gel	전자/PC	false	trap_keywords_mouse_animal_trap	쥐,쥐덫,발목보호대
+tc_4006	치아 닦는거	구강용품(칫솔/치간/실리콘)	치아 닦는거 칫솔 치간칫솔 치실 치약 구강용품 클리너 혀클리너 소독 청소용품	toothbrush_basic,interdental_brush_set,silicone_toothbrush	욕실/위생	false	short_query_multi_answer	소독,청소용품
+tc_4007	눈으로 만드는거	스노우 메이커 집게	눈 만드는거 스노우 메이커 눈사람 집게 오리 스노우 겨울 만들기 메시멜로우 아이라이너 눈물 안약	snow_maker_duck_clipper	계절/겨울	false	trap_keywords_eye_products	아이라이너,눈물,안약
+tc_4008	두쫀쿠 있어?	두바이 쫀득 쿠키	두쫀쿠 두바이쫀득쿠키 쫀득 쿠키 간식 초코 피스타치오 카다이프 마시멜로우 찹쌀 포장용기 슬라임 쫀득이	dubai_chewy_cookie	식품/간식	false	slang_normalization	슬라임,쫀득이
+tc_4009	집게 있어?	헤어 집게핀	집게 집게핀 헤어집게 헤어클립 머리 집게 클립 홀더 빨래집게 서류집게 대게 꽃게	hair_claw_clip_basic	뷰티/헤어	true	homonym_clamp_clip_ambiguous	빨래집게,서류집게,대게,꽃게
+tc_4010	틈새 메꾸는 헤라 주세요	다목적 헤라/스크래퍼	틈새 메꾸는 헤라 실리콘 헤라 스크래퍼 주걱 공구 작업도구 코킹 실링 화장품 그리스신화 여신	multi_scraper_spatula	공구/DIY	false	trap_keywords_myth_cosmetics	화장품,그리스신화,여신
+tc_4011	검은색 유성 매직	유성 매직 펜(검정)	검은색 유성 매직 문구 펜 마카 네임펜 유성마커 라벨 마술 마법사 카드게임 초능력	permanent_marker_black	문구/사무	false	trap_keywords_magic	마술,마법사,카드게임,초능력
+tc_4012	딱풀 대용량	고체 풀(대용량)	딱풀 대용량 고체풀 글루스틱 접착제 문구 학용품 풀 스틱 잡초 잔디 식물 수영장	glue_stick_large	문구/사무	false	trap_keywords_plants_pool	잡초,잔디,식물,수영장
+tc_4013	믹싱볼 스텐으로 된 거	스테인리스 믹싱볼	믹싱볼 스텐 스테인리스 볼 그릇 양푼 조리도구 주방용품 공 축구 야구 뺨	stainless_mixing_bowl_24	주방/조리	false	trap_keywords_ball_sports	공,축구,야구,뺨
+tc_4014	바퀴벌레 트랩	바퀴벌레 포획기/끈끈이	바퀴벌레 트랩 포획기 끈끈이 방역 살충 해충 벌레 덫 힙합 음악장르 가요 사냥용	cockroach_trap_glue	해충/방역	false	trap_keywords_music_hunting	힙합,음악장르,가요,사냥용
+tc_4015	5000원짜리 무선 마우스	가성비 무선 광마우스	5000원 무선 마우스 컴퓨터용품 주변기기 광마우스 가성비 TG 맥스틸 쥐 생물 미키 입	wireless_mouse_basic	전자/PC	false	price_keyword	쥐,생물,미키,입
+tc_4016	벽에 붙이는 인테리어 폼블럭 있어요?	인테리어 폼블럭/시트지	인테리어 폼블럭 벽지 리폼 시트지 단열 폼타일 접착 좌석 자동차의자 악보 침대보	interior_foam_block_tile	인테리어	true	inferred_question_original_missing	좌석,자동차의자,악보,침대보
+tc_4017	3구 멀티탭	전원 연장 멀티탭(3구)	3구 멀티탭 전선 콘센트 전기용품 연장선 개별스위치 전원탭 탭댄스 수도꼭지 태블릿 술집	multi_tap_3outlet_switch	전자/디지털	false	trap_keywords_tap_dance_faucet	탭댄스,수도꼭지,태블릿,술집
+tc_4018	과일 먹는 포크	디저트 포크/과일꽂이	과일 먹는 포크 디저트포크 과일꽂이 식기 수저 주방 찍개 굴착기 돼지고기 민속음악 공사장	dessert_fork_set	주방/식기	false	trap_keywords_excavator	굴착기,돼지고기,민속음악,공사장
+tc_4019	맛밤 간식	밤 간식(맛밤)	맛밤 밤 간식 식품 견과류 가공식품 스낵 CJ 야간 저녁 어둠 취침	chestnut_snack_pack	식품/간식	false	homonym_night_chestnut_trap	야간,저녁,어둠,취침
+tc_4020	밤에 쓰는 등 추천해주세요	손전등/캠핑랜턴	밤 야간 등 조명 랜턴 손전등 캠핑 밝기 건전지 견과류 밤나무	camping_lantern_led,flashlight_led_basic	캠핑/조명	false	trap_keywords_chestnut	견과류,밤나무
+tc_4021	파 썰 때 쓰는 거 있어요?	파채칼/도마	파 썰 때 파채칼 채칼 도마 주방도구 야채 슬라이서 파도 물결	green_onion_slicer,cutting_board_basic	주방/조리	false	trap_keywords_wave	파도,물결
+tc_4022	마우스 패드 추천해주세요	컴퓨터 마우스패드	마우스 패드 마우스패드 컴퓨터 데스크 게이밍 논슬립 쥐 동물	mouse_pad_basic	전자/PC	false	trap_keywords_mouse_animal	쥐,동물
+tc_4023	수박 담는 그릇 주세요	과일볼/대접	수박 담는 그릇 과일볼 대접 볼 용기 주방 그릇 담다 숫자 박수	fruit_bowl_large,stainless_bowl_large	주방/식기	false	trap_keywords_clap_number	숫자,박수
+tc_4024	밤 까는 기계 어디서 사요?	너트크래커/밤가위	밤 까는 기계 밤까기 도구 견과류 탈피 너트크래커 밤가위 주방기구 야간 저녁 어둠	nut_cracker_metal,chestnut_scissors	주방/조리	false	homonym_night_chestnut_trap	야간,저녁,어둠
+tc_4025	창문에 달 거 필요해요	커튼/블라인드	창문 달 거 커튼 블라인드 부착 가리개 인테리어 커튼봉 후크 달 천체 달님	window_curtain_basic,window_blind_basic	인테리어	false	trap_keywords_moon	천체,달님
+tc_4026	차 우리는 거 보여주세요	티포트/찻주전자	차 우리는 거 티 차 우려 티포트 찻주전자 주전자 찻잔 차량 자동차	teapot_glass_800,teapot_stainless	주방/조리	false	trap_keywords_vehicle	차량,자동차
+tc_4027	눈 오면 쓰는 거 찾아요	제설삽/스노우삽	눈 오면 쓰는거 눈 겨울 강설 제설 삽 스노우삽 제설도구 눈사람 시력 안구	snow_shovel_basic	계절/겨울	false	trap_keywords_eye	시력,안구
+tc_4028	콩 가는 기계 있어요?	곡물 그라인더/블렌더	콩 가는 기계 콩 분쇄 곡물 그라인더 두유 믹서기 블렌더 갈다 출발 이동	grain_grinder_small,blender_basic	주방/가전	false	trap_keywords_movement	출발,이동
+tc_4029	볼 펜 말고 다른 거요	대체 필기구(젤펜/사인펜/만년필)	볼펜 말고 다른거 펜 필기구 젤펜 사인펜 만년필 연필 문구 공 구형	gel_pen_black,fountain_pen_basic,sign_pen_black	문구/사무	false	homonym_ball_trap	공,구형
+tc_4030	기념일 편지 쓰려는데 핑크색으로 있어?	핑크 편지 세트	기념일 편지 핑크 편지지 봉투 감성 선물 메시지카드 립스틱	pink_letter_set_aesthetic	문구/사무	false	trap_keywords_lipstick	립스틱
+tc_4031	감자 팩 같은 거 있어요?	감자 캡슐팩/마스크팩	감자 팩 마스크팩 캡슐팩 스킨케어 피부 고구마팩 감자칩 캡슐편지지	potato_capsule_mask_pack	뷰티/스킨	false	trap_keywords_snack_stationery	감자칩,캡슐편지지
+tc_4032	욕조 배수구에 끼우는 거 있나요?	욕조 배수구 거름망	욕조 배수구 끼우는거 배수망 거름망 스텐 필터 머리카락 싱크대 하수구뚜껑	bath_drain_strainer_stainless	욕실/청소	false	trap_keywords_sink_sewer_cap	싱크대,하수구뚜껑
+tc_4033	작은 사무용 가위 있어요?	소형 사무용 가위	작은 사무용 가위 소형 오피스 블랙코팅 절단 문구 주방가위 미용가위 어린이가위	scissors_office_small_black	문구/사무	false	trap_keywords_other_scissors	주방가위,미용가위,어린이가위
+tc_4034	욕실 청소용 수세미 세트 있나요?	욕실 청소 스펀지/수세미 세트	욕실 청소 수세미 스펀지 세트 대용량 타일 물때 주방수세미 행주	bath_scrub_sponge_set_10	욕실/청소	false	trap_keywords_kitchen_rag	주방수세미,행주
+tc_4035	디자인 있는 휴지통 있어요?	디자인 휴지통	디자인 휴지통 쓰레기통 인테리어 토네이도 재활용함 여행용티슈	design_trashbin_tornado	생활/정리	false	trap_keywords_tissue	여행용티슈
+tc_4036	작은 티슈 있어요?	미니티슈/휴대용 티슈	작은 티슈 미니티슈 휴대용 각티슈 포켓티슈 휴지 물티슈 키친타월	mini_tissue_230	생활/소모품	false	trap_keywords_wet_kitchen	물티슈,키친타월
+tc_4037	속옷 정리하는 칸 나뉜 거 있어요?	속옷 정리함(칸막이)	속옷 정리 칸 나뉜 정리함 수납 칸막이 서랍정리 옷걸이 서랍박스	underwear_organizer_8cell	생활/정리	false	organizer_partition	
+tc_4038	친환경 수세미 같은 거 있나요?	친환경 수세미(옥수수 망사)	친환경 수세미 옥수수 망사 설거지 주방 청소 철수세미 매직블럭	corn_mesh_scrubber	주방/청소	false	trap_keywords_steel_magicblock	철수세미,매직블럭
+tc_4039	모니터 옆에 붙이는 메모판 있어요?	모니터 메모 보드	모니터 옆 붙이는 메모판 메모보드 메모보드 부착 사무용 정리 화이트보드 포스트잇	monitor_memo_board_30cm	문구/사무	false	trap_keywords_postit_whiteboard	화이트보드,포스트잇
+tc_4040	텀블러 뜨거운물 부어서 세척할 때 쓰는거	발포 텀블러 세척제	텀블러 세척 뜨거운물 발포 세정제 물때 제거 클리너 수세미 식기세척	tumbler_cleaner_tablet	주방/청소	false	intent_by_usage	식기세척
+tc_4041	풀 어디 있어요?	딱풀/고체풀	풀 접착제 딱풀 고체풀 문구 사무용품 학용품 조화 식물	glue_stick_basic	문구/사무	false	homonym_grass_trap	조화,식물
+tc_4042	마우스 잡는거 있나요?	쥐덫/쥐끈끈이	마우스 잡는거 쥐 끈끈이 쥐덫 방역 트랩 포획 컴퓨터 전자제품	mouse_trap_glue_board	해충/방역	false	trap_keywords_computer_mouse	컴퓨터,전자제품
+tc_4043	매직 찾아요.	유성 매직 펜	매직 유성매직 네임펜 마카 문구 사무용품 라벨 마술용품	permanent_marker_black	문구/사무	false	ambiguous_word_magic	마술용품
+tc_4044	차 냄새 나는거 없애고 싶어요.	차량용 탈취제	차 냄새 탈취제 방향제 차량용 자동차 악취 제거 녹차 둥글레차	car_deodorizer_spray	자동차용품	false	trap_keywords_tea	녹차,둥글레차
+tc_4045	노트 찾고 있어요.	공책/노트	노트 공책 수첩 연습장 필기 문구 갤럭시노트	notebook_a5_grid	문구/사무	false	trap_keywords_galaxy_note	갤럭시노트
+tc_4046	눈 찌르는거 정리하고 싶어요.	눈썹 정리 가위	눈 찌르는거 정리 눈썹가위 눈썹칼 쪽집게 미용 눈 제설제 넉가래	eyebrow_scissors	뷰티/미용	false	trap_keywords_snow_tools	제설제,넉가래
+tc_4047	축의금 낼 봉투.	현금 봉투	축의금 봉투 현금봉투 경조사 결혼 부의 문구 서류봉투 쓰레기봉투 롤백	cash_envelope_basic	문구/사무	false	trap_keywords_trashbag_rollbag	쓰레기봉투,롤백
+tc_4048	옷 리폼할 때 쓸 핀.	옷핀(안전핀)	옷 리폼 핀 옷핀 안전핀 수선 고정 압정 머리핀	clothing_pin_safety	생활/잡화	false	trap_keywords_thumbtack_hairpin	압정,머리핀
+tc_4049	먼지 떼는 롤.	롤 클리너(테이프 클리너)	먼지 떼는 롤 롤클리너 테이프클리너 점착 청소 의류 롤백 헤어롤	lint_roller_basic	생활/청소	false	trap_keywords_rollbag_hairroll	롤백,헤어롤
+tc_4050	고기 구울 때 쓰는 집게	고기 집게(스텐)	고기 굽는 집게 스텐집게 주방용품 바베큐 그릴 빨래집게 미용실집게	meat_tongs_stainless	주방/조리	false	homonym_cloth_hair_clamp_trap	빨래집게,미용실집게
+tc_4051	밤 까는 기계 있나요?	밤 가위/견과 탈피기	밤 까는 기계 밤가위 견과류 탈피 도구 주방 야간 Night 어둠	chestnut_scissors,nut_cracker_metal	주방/조리	false	homonym_night_chestnut_trap	야간,Night,어둠
+tc_4052	발 걷는 도구	커튼 고정 후크	발 걷는 도구 발 커튼 가리개 고정 후크 인테리어 신체 족부 발바닥	blind_hook_curtain_tie	인테리어	false	homonym_foot_vs_curtain	신체,족부,발바닥
+tc_4053	갤탭 필기구	갤럭시탭 터치펜(S펜 호환)	갤탭 필기구 태블릿 터치펜 S펜 호환 스타일러스 삼성 공책 우주 은하수	s_pen_compatible_stylus	전자/디지털	false	trap_keywords_space	우주,은하수
+tc_4054	돌돌이 리필	롤클리너 리필 테이프	돌돌이 리필 롤클리너 리필 테이프 점착 먼지제거 청소 의류 장난감 김밥 휴지	lint_roller_refill_tape	생활/청소	false	trap_keywords_tissue_food	장난감,김밥,휴지
+tc_4055	비 올 때 신발 안 젖게 하는 거	신발 방수 커버	비 올 때 신발 안 젖게 방수 커버 레인커버 실리콘 장마 우산 우비 수건	shoe_rain_cover_silicone	생활/잡화	false	trap_keywords_umbrella_towel	우산,우비,수건
+tc_4056	고기 구울 때 까는 종이	종이 호일	고기 구울 때 까는 종이 종이호일 호일 베이킹 쿠킹시트 기름받이 신문지 A4 휴지	parchment_paper_roll	주방/조리	false	trap_keywords_paper_types	신문지,A4,휴지
+tc_4057	벽 안 뚫고 액자 걸기	무타공 액자걸이(꼬꼬핀/접착후크)	벽 안 뚫고 액자 걸기 무타공 꼬꼬핀 접착후크 액자걸이 고정 드릴 망치 못	no_nail_hook_pin,adhesive_hook_strong	생활/공구	false	no_drill_install	드릴,망치,못
+tc_4058	뽁뽁이 좀 주세요	에어캡(뽁뽁이)	뽁뽁이 에어캡 완충재 단열재 포장 보온 시트 장난감 아기신발	bubble_wrap_insulation	포장/자재	false	trap_keywords_toy_shoes	장난감,아기신발
+tc_4059	의자 끌 때 소리 안 나게 하는 거	의자 발커버	의자 끌 때 소리 방지 발커버 펠트 실리콘 층간소음 바닥 방음 귀마개 스피커 소음측정기	chair_leg_cover_felt	생활/정리	false	trap_keywords_earplug_speaker	귀마개,스피커,소음측정기
+tc_4060	옷장에 물 먹는 하마 같은 거	옷장용 제습제	옷장 물먹는하마 제습제 습기제거 곰팡이 장마 습기 동물원 하마 물통 수족관	closet_dehumidifier_box	생활/소모품	false	homonym_hippo_trap	동물원,하마,물통,수족관

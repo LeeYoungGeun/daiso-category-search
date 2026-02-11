@@ -1,0 +1,48 @@
+vendor_sets:
+  # 1) 완전 로컬(디버그/개념검증)
+  local_mock:
+    embedding:
+      provider: mock
+      dim: 128
+    vector_db:
+      provider: local
+    bm25:
+      provider: builtin
+    rerank:
+      provider: mock
+
+  # 2) 외부 실험 표준(추천): OpenAI 임베딩 + Qdrant + Elastic
+  ext_qdrant_elastic:
+    embedding:
+      provider: openai
+      model: text-embedding-3-small
+    vector_db:
+      provider: qdrant
+      endpoint_env: QDRANT_URL
+      api_key_env: QDRANT_API_KEY
+      index: products
+    bm25:
+      provider: elastic
+      endpoint_env: ELASTIC_URL
+      api_key_env: ELASTIC_API_KEY
+      index: products
+    rerank:
+      provider: mock
+
+  # 3) 임베딩만 바꿔서 비교(예: Google)
+  ext_qdrant_elastic_google:
+    embedding:
+      provider: google
+      model: gemini-embedding-001
+    vector_db:
+      provider: qdrant
+      endpoint_env: QDRANT_URL
+      api_key_env: QDRANT_API_KEY
+      index: products
+    bm25:
+      provider: elastic
+      endpoint_env: ELASTIC_URL
+      api_key_env: ELASTIC_API_KEY
+      index: products
+    rerank:
+      provider: mock

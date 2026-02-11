@@ -1,0 +1,11 @@
+{
+  "name": "daiso-category-search",
+  "version": "1.0.0",
+  "description": "Daiso category search with TDD",
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}

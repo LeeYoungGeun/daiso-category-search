@@ -1,0 +1,460 @@
+doc_id	title	text	category
+battery_aa	AA 건전지	알카라인 AA 건전지 2개입 4개입 배터리	전자/디지털
+battery_aaa	AAA 건전지	알카라인 AAA 건전지 배터리 리모컨 장난감	전자/디지털
+power_strip	멀티탭	콘센트 멀티탭 3구 5구 개별 스위치	전자/디지털
+super_glue	순간접착제	순간접착제 강력 접착 본드 접착제	문구/사무
+bath_slippers	욕실 슬리퍼	욕실화 욕실 슬리퍼 미끄럼 방지	욕실/청소
+bath_mat	욕실 매트	욕실 매트 발매트 흡수 미끄럼방지 욕실용품	욕실/청소
+yoga_mat	요가 매트	요가 매트 운동 매트 홈트 필라테스	스포츠/레저
+pilates_mat	필라테스 매트	필라테스 매트 운동 매트 요가	스포츠/레저
+door_mat	현관 매트	현관 매트 발매트 먼지 제거	생활/잡화
+kitchen_mat	주방 매트	주방 매트 싱크대 발매트	주방/식품
+bath_cleaner	욕실 세정제	욕실 청소 세정제 곰팡이 제거	욕실/청소
+toilet_brush	변기솔	변기솔 변기 청소 브러시	욕실/청소
+shampoo	샴푸	샴푸 헤어케어	뷰티/헬스
+hand_soap	핸드워시	손세정 비누 핸드워시	욕실/청소
+masking_tape	마스킹 테이프	테이프 문구 포장	문구/사무
+scissors	가위	가위 문구 사무용	문구/사무
+tissue	휴지	두루마리 휴지 화장지	욕실/청소
+wet_wipes	물티슈	물티슈 청소	욕실/청소
+microfiber_cloth	극세사 행주	극세사 행주 청소 수건	욕실/청소
+mop	밀대	바닥 청소 밀대	욕실/청소
+usb_cable	USB 케이블	충전 케이블 데이터 케이블	전자/디지털
+charger	충전기	USB 충전기 어댑터	전자/디지털
+extension_cord	연장선	전기 연장선 멀티탭	전자/디지털
+glue_stick	풀	풀 스틱풀 접착제 문구	문구/사무
+tape	투명 테이프	투명테이프 포장 테이프	문구/사무
+bathrobe	샤워가운	샤워가운 목욕가운	생활/잡화
+bath_towel	수건	목욕 수건 타월	생활/잡화
+deodorizer	방향제	화장실 방향제 욕실	욕실/청소
+drain_cleaner	배수구 클리너	배수구 청소 악취 제거	욕실/청소
+rubber_gloves	고무장갑	청소 고무장갑 주방	주방/식품
+bath_slippers_set	욕실 슬리퍼 세트	욕실화 욕실 슬리퍼 미끄럼 방지 세트 구성	욕실/청소
+bath_mat_large	욕실 매트 대형	욕실 매트 발매트 흡수 미끄럼방지 욕실용품 대형	욕실/청소
+bath_mat_small	욕실 매트 소형	욕실 매트 발매트 흡수 미끄럼방지 욕실용품 소형	욕실/청소
+yoga_mat_large	요가 매트 대형	요가 매트 운동 매트 홈트 필라테스 대형	스포츠/레저
+yoga_mat_small	요가 매트 소형	요가 매트 운동 매트 홈트 필라테스 소형	스포츠/레저
+pilates_mat_large	필라테스 매트 대형	필라테스 매트 운동 매트 요가 대형	스포츠/레저
+pilates_mat_small	필라테스 매트 소형	필라테스 매트 운동 매트 요가 소형	스포츠/레저
+door_mat_large	현관 매트 대형	현관 매트 발매트 먼지 제거 대형	생활/잡화
+door_mat_small	현관 매트 소형	현관 매트 발매트 먼지 제거 소형	생활/잡화
+kitchen_mat_large	주방 매트 대형	주방 매트 싱크대 발매트 대형	주방/식품
+kitchen_mat_small	주방 매트 소형	주방 매트 싱크대 발매트 소형	주방/식품
+toilet_brush_set	변기솔 세트	변기솔 변기 청소 브러시 세트 구성	욕실/청소
+hand_soap_set	핸드워시 세트	손세정 비누 핸드워시 세트 구성	욕실/청소
+tissue_set	휴지 세트	두루마리 휴지 화장지 세트 구성	욕실/청소
+wet_wipes_set	물티슈 세트	물티슈 청소 세트 구성	욕실/청소
+microfiber_cloth_set	극세사 행주 세트	극세사 행주 청소 수건 세트 구성	욕실/청소
+mop_set	밀대 세트	바닥 청소 밀대 세트 구성	욕실/청소
+deodorizer_set	방향제 세트	화장실 방향제 욕실 세트 구성	욕실/청소
+drain_cleaner_set	배수구 클리너 세트	배수구 청소 악취 제거 세트 구성	욕실/청소
+diatomite_mat	규조토 매트	규조토 매트 욕실 발매트 흡수 건조 미끄럼방지 화장실 문앞	욕실/청소
+diatomite_mat_large	규조토 매트 대형	규조토 매트 대형 욕실 발매트 흡수 건조 미끄럼방지 화장실 문앞	욕실/청소
+diatomite_mat_small	규조토 매트 소형	규조토 매트 소형 욕실 발매트 흡수 건조 미끄럼방지 화장실 문앞	욕실/청소
+bath_rug	욕실 러그 발판	욕실 러그 발판 화장실 문앞 깔개 보송 발매트 미끄럼방지	생활/잡화
+bath_rug_large	욕실 러그 발판 대형	욕실 러그 발판 대형 화장실 문앞 깔개 보송 발매트 미끄럼방지	생활/잡화
+bath_rug_small	욕실 러그 발판 소형	욕실 러그 발판 소형 화장실 문앞 깔개 보송 발매트 미끄럼방지	생활/잡화
+toilet_u_mat	변기 U자 매트	변기 U자 매트 화장실 변기 앞 매트 발매트 미끄럼방지	욕실/청소
+toilet_u_mat_set	변기 U자 매트 세트	변기 U자 매트 세트 화장실 변기 앞 매트 발매트 세트 구성	욕실/청소
+anti_slip_mat_pad	미끄럼방지 패드	미끄럼방지 패드 매트 패드 고정 욕실 주방 바닥	생활/잡화
+fruit_knife	과도	과도 사과 칼 과일 칼 작은 칼 주방 칼 과일 손질	주방/식품
+iphone_case	애플폰 케이스	애플폰 케이스 아이폰 케이스 iphone case 폰케이스 스마트폰 케이스	전자/디지털
+fruit_peeler	과일 필러	과일 필러 감자 필러 사과 껍질 필러 껍질 제거 주방 도구	주방/식품
+apple_slicer	사과 슬라이서	사과 슬라이서 사과 커터 사과 자르기 과일 커터 주방 도구	주방/식품
+fruit_knife_set	과도 세트	과도 세트 과일 칼 세트 사과 칼 작은 칼 세트 주방 칼	주방/식품
+cutting_board	도마	도마 주방 도마 나무 도마 플라스틱 도마 칼질	주방/식품
+chef_knife	식도	식도 주방 칼 요리 칼 칼 손질	주방/식품
+fruit_storage_box	과일 보관 케이스	과일 보관 케이스 사과 보관 케이스 과일 보관 통 밀폐 용기	주방/식품
+screen_protector	액정 보호필름	액정 보호필름 아이폰 필름 스마트폰 보호필름 강화유리	전자/디지털
+wireless_charger	무선 충전기	무선 충전기 고속 무선충전 패드 스마트폰 충전	전자/디지털
+phone_grip	스마트폰 그립톡	그립톡 스마트폰 거치 그립 핸드폰 링 홀더	전자/디지털
+phone_strap	폰 스트랩	폰 스트랩 핸드폰 줄 손목 스트랩 휴대폰 악세사리	전자/디지털
+ipad_case	아이패드 케이스	아이패드 케이스 iPad 케이스 태블릿 케이스 애플 아이패드 보호	전자/디지털
+ipad_screen_protector	아이패드 보호필름	아이패드 필름 iPad 보호필름 태블릿 액정 보호필름 강화유리	전자/디지털
+ipad_stylus	아이패드 스타일러스 펜	아이패드 펜 iPad 스타일러스 펜 터치펜 태블릿 펜슬	전자/디지털
+airpods_case	에어팟 케이스	에어팟 케이스 AirPods 케이스 이어폰 케이스 애플 에어팟 보호	전자/디지털
+airpods_ear_tips	에어팟 이어팁	에어팟 이어팁 AirPods 이어팁 실리콘 이어팁 교체용	전자/디지털
+airpods_cable	에어팟 충전 케이블	에어팟 충전 케이블 라이트닝 USB-C 충전선 AirPods 케이블	전자/디지털
+macbook_sleeve	맥북 파우치	맥북 파우치 MacBook 슬리브 노트북 파우치 애플 노트북 케이스	전자/디지털
+macbook_charger	맥북 충전기	맥북 충전기 MacBook 어댑터 USB-C 충전기 노트북 어댑터	전자/디지털
+macbook_usb_hub	맥북 USB 허브	맥북 허브 USB-C 허브 멀티허브 노트북 포트 확장	전자/디지털
+ipod_case	아이팟 케이스	아이팟 케이스 iPod 케이스 음악 플레이어 케이스 보호	전자/디지털
+ipod_dock	아이팟 도킹 스테이션	아이팟 도크 iPod 거치대 도킹 스피커 독	전자/디지털
+ipod_earphones	아이팟 이어폰	아이팟 이어폰 유선 이어폰 3.5mm 이어폰 음악용	전자/디지털
+galaxy_case	갤럭시 폰 케이스	갤럭시 케이스 Galaxy 케이스 삼성 폰케이스 스마트폰 케이스	전자/디지털
+galaxy_screen_protector	갤럭시 보호필름	갤럭시 필름 Galaxy 보호필름 액정보호 강화유리	전자/디지털
+galaxy_buds_case	갤럭시 버즈 케이스	갤럭시 버즈 케이스 Galaxy Buds 케이스 무선이어폰 케이스	전자/디지털
+galaxy_charger	삼성 고속 충전기	삼성 충전기 고속충전 어댑터 USB-C 충전기	전자/디지털
+galaxy_usb_cable	삼성 USB-C 케이블	삼성 케이블 USB-C 케이블 충전 케이블 데이터 케이블	전자/디지털
+galaxy_power_bank	삼성 보조배터리	삼성 보조배터리 휴대용 배터리 USB-C 보조배터리	전자/디지털
+galaxy_watch_band	갤럭시 워치 스트랩	갤럭시 워치 밴드 스트랩 시계줄 삼성 워치	전자/디지털
+galaxy_tablet_case	갤럭시탭 케이스	갤럭시탭 케이스 Galaxy Tab 태블릿 케이스 삼성 탭 보호	전자/디지털
+samsung_keyboard	삼성 블루투스 키보드	삼성 키보드 블루투스 키보드 무선 키보드 태블릿 키보드	전자/디지털
+samsung_stylus_pen	삼성 스타일러스 펜	삼성 S펜 스타일러스 펜 터치펜 태블릿 펜	전자/디지털
+apple_juice	사과 주스	사과 주스 과일 주스 음료 100% 주스	주방/식품
+apple_vinegar	사과 식초	사과 식초 애플사이다 비니거 식초 음용 식초	주방/식품
+apple_jam	사과 잼	사과 잼 과일 잼 빵 잼 토스트 잼	주방/식품
+apple_chips	사과칩	사과칩 건조 사과 말린 사과 간식	주방/식품
+dried_apple_slices	말린 사과 슬라이스	말린 사과 건조 사과 슬라이스 과일 간식	주방/식품
+apple_pie	사과파이	사과파이 디저트 파이 베이커리 간식	주방/식품
+apple_sauce	애플소스	애플소스 사과 소스 과일 퓨레 이유식	주방/식품
+apple_candy	사과맛 캔디	사과맛 캔디 사탕 과일맛 사탕	주방/식품
+apple_tea	사과차	사과차 과일차 티백 차 음료	주방/식품
+apple_syrup	사과 시럽	사과 시럽 과일 시럽 음료 토핑	주방/식품
+gift_box	선물 박스	선물 박스 기프트 박스 포장 박스 상자	생활/잡화
+storage_box_plastic	수납 박스(플라스틱)	수납 박스 정리함 플라스틱 박스 보관함	생활/잡화
+cardboard_box	택배 박스(종이상자)	택배 박스 종이 상자 포장용 박스 박스테이프	생활/잡화
+lunch_box	도시락 박스	도시락 박스 런치박스 밀폐 도시락통	주방/식품
+shoe_box	신발 박스	신발 박스 보관 상자 신발 정리	생활/잡화
+cling_film	랩(비닐랩)	비닐랩 랩 음식 랩핑 보관 랩	주방/식품
+vinyl_bag	비닐봉투	비닐봉투 봉지 쇼핑 봉투 포장 비닐	생활/잡화
+zipper_bag	지퍼백	지퍼백 비닐팩 보관팩 냉동 보관	주방/식품
+vinyl_gloves_disposable	일회용 비닐장갑	비닐장갑 일회용 장갑 위생 장갑	주방/식품
+vinyl_pouch	비닐 파우치	비닐 파우치 투명 파우치 방수 파우치 수납	생활/잡화
+apple_char_sticker	사과 캐릭터 스티커	사과 캐릭터 스티커 애플 캐릭터 귀여운 스티커 다꾸	문구/사무
+apple_char_keyring	사과 캐릭터 키링	사과 캐릭터 키링 열쇠고리 가방고리 액세서리	생활/잡화
+apple_char_plush	사과 캐릭터 인형	사과 캐릭터 인형 봉제인형 귀여운 인형	생활/잡화
+apple_char_notebook	사과 캐릭터 노트	사과 캐릭터 노트 공책 문구 다이어리	문구/사무
+apple_char_pen	사과 캐릭터 볼펜	사과 캐릭터 펜 볼펜 문구 필기구	문구/사무
+apple_char_mug	사과 캐릭터 머그컵	사과 캐릭터 컵 머그컵 캐릭터 컵	생활/잡화
+apple_char_phone_case	사과 캐릭터 폰케이스	사과 캐릭터 폰케이스 귀여운 케이스 스마트폰 케이스	전자/디지털
+apple_char_tote	사과 캐릭터 에코백	사과 캐릭터 가방 에코백 토트백 캐릭터 굿즈	생활/잡화
+apple_char_badge	사과 캐릭터 뱃지	사과 캐릭터 뱃지 배지 핀뱃지 캐릭터 굿즈	생활/잡화
+apple_char_figurine	사과 캐릭터 피규어	사과 캐릭터 피규어 미니 피규어 장식 소품	생활/잡화
+apple_box_char_keyring	사과 상자 캐릭터 열쇠고리	사과 상자 캐릭터 열쇠고리 키링 키체인 가방고리 미니어처 장식 소품	생활/잡화
+transparent_multi_storage_tray_m	투명 멀티 수납 트레이 M	칸 분리 가능한 투명 정리 트레이(M)	생활/정리
+transparent_multi_storage_tray_s	투명 멀티 수납 트레이 S	칸 분리 가능한 투명 정리 트레이(S)	생활/정리
+transparent_multi_storage_tray_l	투명 멀티 수납 트레이 L	칸 분리 가능한 투명 정리 트레이(L)	생활/정리
+clear_drawer_organizer	투명 서랍 정리함	서랍 속 소품 정리용 투명 박스	생활/정리
+clear_stackable_box	투명 적층 수납박스	쌓아 쓰는 투명 수납 박스	생활/정리
+clear_partition_tray	투명 칸막이 트레이	칸막이 구조의 투명 트레이	생활/정리
+strawberry_crown_sando	딸기맛 크라운 산도	딸기 크림 샌드 과자	식품/간식
+strawberry_wafer	딸기 웨하스	딸기향 크림 웨하스 과자	식품/간식
+strawberry_cookie	딸기 쿠키	딸기맛 쿠키 스낵	식품/간식
+strawberry_jelly	딸기 젤리	딸기향 젤리 간식	식품/간식
+strawberry_choco_snack	딸기초코 스낵	딸기향 초코 코팅 스낵	식품/간식
+strawberry_pie_snack	딸기 파이 스낵	딸기잼 필링 파이형 과자	식품/간식
+toothbrush_holder_drain	물빠짐 칫솔 꽂이	바닥 배수 구멍형 칫솔 거치대	욕실/위생
+toothbrush_holder_wall	벽부착 칫솔걸이	흡착/접착형 칫솔 거치대	욕실/위생
+toothbrush_holder_set4	칫솔꽂이 4구 세트	가족용 4구 칫솔 홀더	욕실/위생
+toothbrush_holder_cup	컵형 칫솔 홀더	컵 겸용 칫솔 거치대	욕실/위생
+toothbrush_uv_case	칫솔 보관 케이스	휴대용 칫솔 보관 케이스	욕실/위생
+toothbrush_rack_stainless	스텐 칫솔 거치대	스테인리스 칫솔/치약 거치대	욕실/위생
+glasses_case_hard	하드 안경 케이스	충격 보호 하드 타입 안경집	패션/잡화
+glasses_case_soft	소프트 안경 파우치	가벼운 파우치형 안경집	패션/잡화
+glasses_case_foldable	접이식 안경 케이스	납작하게 접히는 안경 케이스	패션/잡화
+sunglasses_case_hard	선글라스 케이스	대형 프레임용 케이스	패션/잡화
+glasses_cleaning_cloth	안경 닦이 천	극세사 안경 클리너	패션/잡화
+glasses_chain_basic	안경 줄	목걸이형 안경 스트랩	패션/잡화
+mouse_wrist_rest_gel	젤 마우스 손목 받침대	젤 패드 손목 보호 받침	전자/PC
+mouse_wrist_rest_memory	메모리폼 손목 받침대	메모리폼 손목 보호 패드	전자/PC
+keyboard_wrist_rest	키보드 손목 받침대	키보드 앞 손목 보호대	전자/PC
+ergonomic_mouse_pad	손목 보호 마우스패드	손목 쿠션 일체형 패드	전자/PC
+wrist_support_band	손목 보호 밴드	압박형 손목 서포터	전자/PC
+mouse_pad_large_desk	데스크 매트 패드	대형 책상용 마우스 매트	전자/PC
+toothbrush_basic	일반 칫솔	데일리 기본 칫솔	욕실/위생
+toothbrush_soft	부드러운 칫솔	소프트모 칫솔	욕실/위생
+interdental_brush_set	치간칫솔 세트	사이사이 관리용 치간칫솔	욕실/위생
+dental_floss_mint	치실(민트)	민트향 치실	욕실/위생
+tongue_cleaner	혀 클리너	구취 관리용 혀클리너	욕실/위생
+silicone_toothbrush	실리콘 칫솔	실리콘 재질 위생 칫솔	욕실/위생
+snow_maker_duck_clipper	스노우 메이커 오리 집게	눈사람/오리 모양 제작 집게	계절/겨울
+snow_maker_heart	스노우 메이커 하트	하트 모양 눈 제작 틀	계절/겨울
+snow_maker_ball	스노우볼 메이커	눈덩이 원형 제작 도구	계절/겨울
+snow_maker_large	대형 스노우 메이커	큰 눈덩이 제작 집게	계절/겨울
+snow_sled_mini	미니 눈썰매	소형 눈놀이 썰매	계절/겨울
+snow_gloves_kids	겨울 눈놀이 장갑	방수형 눈놀이 장갑	계절/겨울
+dubai_chewy_cookie	두바이 쫀득 쿠키	쫀득 식감 쿠키 간식	식품/간식
+chewy_cookie_choco	쫀득 초코 쿠키	초코맛 쫀득 쿠키	식품/간식
+pistachio_snack	피스타치오 스낵	견과류 피스타치오 간식	식품/간식
+choco_marshmallow	초코 마시멜로우	초코 코팅 마시멜로우	식품/간식
+dessert_packaging_box	간식 포장 용기	간식 포장용 투명 용기	식품/간식
+kadayif_style_snack	카다이프 스타일 스낵	바삭 디저트형 스낵	식품/간식
+hair_claw_clip_basic	헤어 집게핀 기본형	머리 고정 집게핀	뷰티/헤어
+hair_claw_clip_large	헤어 집게핀 대형	숱 많은 머리용 대형 집게핀	뷰티/헤어
+hair_pin_set	머리핀 세트	실핀/집게핀 혼합 세트	뷰티/헤어
+hair_clip_metal	메탈 헤어클립	금속 재질 헤어 클립	뷰티/헤어
+hair_tie_elastic	머리끈	기본 헤어 밴드/머리끈	뷰티/헤어
+hair_band_basic	헤어밴드	세안/고정용 헤어밴드	뷰티/헤어
+multi_scraper_spatula	다목적 헤라(스크래퍼)	실리콘/퍼티 작업용 스크래퍼	공구/DIY
+silicone_scraper_set	실리콘 스크래퍼 세트	실리콘 제거용 스크래퍼 세트	공구/DIY
+putty_knife_small	퍼티 나이프 소형	틈새 메움 작업 도구	공구/DIY
+caulking_tool_kit	실링 작업 키트	코킹 마감 도구 키트	공구/DIY
+spatula_plastic	플라스틱 주걱 헤라	가벼운 플라스틱 헤라	공구/DIY
+wallpaper_squeegee	시트지 밀대	시트지/필름 부착용 밀대	공구/DIY
+permanent_marker_black	유성 매직 펜(검정)	검정 유성 마커	문구/사무
+permanent_marker_set	유성 매직 세트	색상 혼합 유성 마커 세트	문구/사무
+name_pen_black	네임펜(검정)	라벨링용 네임펜	문구/사무
+marker_fine_tip	파인팁 마커	얇은 글씨용 유성 마커	문구/사무
+white_marker	화이트 마커	검은 바탕용 흰색 마커	문구/사무
+marker_refill_ink	마커 보충 잉크	일부 마커용 리필 잉크	문구/사무
+glue_stick_large	고체 풀 대용량	대용량 글루스틱	문구/사무
+glue_stick_basic	고체 풀 기본형	일반 글루스틱	문구/사무
+liquid_glue	액체 풀	종이/공예용 액체풀	문구/사무
+glue_tape	풀테이프	테이프형 접착제	문구/사무
+strong_glue_stick	강력 고체풀	점착력 강화 글루스틱	문구/사무
+craft_glue_set	공예용 풀 세트	공예 접착제 구성	문구/사무
+stainless_mixing_bowl_24	스테인리스 믹싱볼 24cm	스텐 재질 믹싱볼(24cm)	주방/조리
+stainless_mixing_bowl_20	스테인리스 믹싱볼 20cm	스텐 재질 믹싱볼(20cm)	주방/조리
+stainless_mixing_bowl_28	스테인리스 믹싱볼 28cm	스텐 재질 믹싱볼(28cm)	주방/조리
+mixing_bowl_set3	믹싱볼 3종 세트	소/중/대 믹싱볼 세트	주방/조리
+bowl_with_lid	뚜껑형 믹싱볼	뚜껑 포함 믹싱볼	주방/조리
+non_slip_bowl	미끄럼방지 믹싱볼	바닥 논슬립 믹싱볼	주방/조리
+cockroach_trap_glue	바퀴벌레 끈끈이 트랩	접착형 포획 트랩	해충/방역
+cockroach_bait_gel	바퀴벌레 겔 베이트	유인 살충 겔(가정용)	해충/방역
+ant_trap	개미 트랩	개미 유인 포획 트랩	해충/방역
+fly_sticky_trap	파리끈끈이 트랩	실내용 끈끈이 트랩	해충/방역
+pest_spray_basic	해충 스프레이	실내용 해충 방제 스프레이	해충/방역
+pest_door_seal	틈새 차단 테이프	해충 유입 차단용 문틈 테이프	해충/방역
+wireless_mouse_basic	무선 마우스 기본형	가성비 무선 광마우스	전자/PC
+wireless_mouse_silent	무소음 무선 마우스	클릭 소음 저감형	전자/PC
+wired_mouse_basic	유선 마우스 기본형	기본 유선 광마우스	전자/PC
+mouse_battery_aa	마우스용 AA 건전지	무선 마우스용 건전지	전자/PC
+mouse_pad_basic	기본 마우스패드	기본형 패드	전자/PC
+usb_receiver_storage_case	USB 리시버 보관 케이스	수신기 분실 방지 케이스	전자/PC
+interior_foam_block_tile	인테리어 폼블럭 타일	벽면 리폼용 폼블럭 타일	인테리어
+interior_foam_block_3d	3D 폼블럭 벽지	입체형 폼블럭 벽지	인테리어
+interior_sheet_film	인테리어 시트지(필름)	가구/벽 리폼용 시트지	인테리어
+wallpaper_remover	시트지 제거제	접착 잔여물 제거용	인테리어
+foam_block_edge_trim	폼블럭 마감 몰딩	폼블럭 테두리 마감재	인테리어
+insulation_foam_sheet	단열 폼 시트	보온/단열용 폼 시트	인테리어
+multi_tap_3outlet_switch	3구 멀티탭(개별스위치)	개별 스위치 3구 멀티탭	전자/디지털
+multi_tap_4outlet	4구 멀티탭	기본형 4구 멀티탭	전자/디지털
+power_strip_long_5m	연장선 5m	긴 길이 전원 연장선	전자/디지털
+plug_adapter_2pin	플러그 어댑터	2핀/변환 어댑터	전자/디지털
+cable_tie_velcro	벨크로 케이블타이	전선 정리용 타이	전자/디지털
+surge_protector	서지 보호 멀티탭	과전압 보호형 멀티탭	전자/디지털
+dessert_fork_set	디저트 포크 세트	과일/디저트용 포크 구성	주방/식기
+fruit_pick_set	과일 꽂이 세트	한입 과일용 픽 세트	주방/식기
+small_fork_stainless	미니 스텐 포크	소형 스텐 포크	주방/식기
+dessert_spoon_set	디저트 스푼 세트	디저트용 스푼 구성	주방/식기
+cutlery_case_portable	휴대용 수저 케이스	휴대용 수저/포크 케이스	주방/식기
+fork_spoon_combo	포크스푼 콤보	겸용 포크스푼	주방/식기
+chestnut_snack_pack	맛밤 스타일 밤 간식	가공 밤 간식 팩	식품/간식
+mixed_nuts_pack	믹스넛 소포장	견과류 소포장 세트	식품/간식
+almond_snack	아몬드 스낵	가공 아몬드 간식	식품/간식
+dried_fruit_pack	건과일 믹스	건과일 간식	식품/간식
+protein_bar_basic	프로틴 바	간편 단백질 간식	식품/간식
+choco_snack_pack	초코 스낵 팩	소포장 초코 간식	식품/간식
+camping_lantern_led	캠핑 랜턴 LED	야간 조명용 랜턴	캠핑/조명
+flashlight_led_basic	LED 손전등	휴대용 손전등	캠핑/조명
+headlamp_basic	헤드랜턴	머리에 쓰는 랜턴	캠핑/조명
+lantern_mini	미니 랜턴	초소형 랜턴	캠핑/조명
+battery_aaa_pack	AAA 건전지	랜턴/손전등용 건전지	캠핑/조명
+lantern_hook	랜턴 걸이 후크	텐트/벽면 걸이 후크	캠핑/조명
+green_onion_slicer	파채칼	파를 얇게 써는 파채 도구	주방/조리
+cutting_board_basic	도마 기본형	기본 주방 도마	주방/조리
+knife_kitchen_basic	주방칼 기본형	기본 조리용 칼	주방/조리
+vegetable_peeler	야채 필러	채소 껍질 제거 도구	주방/조리
+slicer_wave	물결 슬라이서	물결 모양 채칼	주방/조리
+cutting_board_small	미니 도마	소형 도마	주방/조리
+mouse_pad_basic	기본 마우스패드	일반형 마우스패드	전자/PC
+mouse_pad_gaming	게이밍 마우스패드	정밀 컨트롤용 패드	전자/PC
+mouse_pad_large	대형 마우스패드	책상 덮는 대형 패드	전자/PC
+desk_mat	데스크 매트	키보드/마우스 겸용 매트	전자/PC
+mouse_pad_wrist	손목형 마우스패드	손목 보호 쿠션형	전자/PC
+mouse_pad_non_slip	논슬립 마우스패드	미끄럼 방지 바닥 처리	전자/PC
+fruit_bowl_large	대형 과일볼	수박/과일 담는 큰 볼	주방/식기
+salad_bowl	샐러드 볼	샐러드용 대형 볼	주방/식기
+stainless_bowl_large	스텐 대접(대형)	대형 스텐 대접	주방/식기
+plastic_bowl_large	플라스틱 대야볼	가벼운 대형 용기	주방/식기
+food_container_large	대형 음식 용기	뚜껑형 대형 용기	주방/식기
+serving_bowl_set	서빙볼 세트	서빙용 볼 구성	주방/식기
+nut_cracker_metal	너트크래커(금속)	견과류/밤 껍질 제거 도구	주방/조리
+chestnut_scissors	밤 가위	밤 전용 탈피 가위	주방/조리
+nut_cracker_plastic	너트크래커(플라스틱)	가벼운 견과 탈피기	주방/조리
+peeler_chestnut	밤칼/필러	밤 껍질 제거용 필러	주방/조리
+nut_pick_tool	견과 픽 도구	속살 빼는 픽 도구	주방/조리
+kitchen_shears	주방가위	다용도 주방 가위	주방/조리
+window_curtain_basic	기본 커튼	창문 가리개 커튼	인테리어
+blackout_curtain	암막 커튼	빛 차단 암막 커튼	인테리어
+window_blind_basic	블라인드	기본형 블라인드	인테리어
+curtain_rod_set	커튼봉 세트	커튼 설치용 봉 세트	인테리어
+curtain_hook_set	커튼 후크 세트	커튼 고정 후크 구성	인테리어
+window_film_frosted	창문 시트지(반투명)	프라이버시용 창문 필름	인테리어
+teapot_glass_800	유리 티포트 800ml	차 우리기 유리 주전자	주방/조리
+teapot_stainless	스텐 티포트	스테인리스 찻주전자	주방/조리
+tea_infuser_ball	티 인퓨저 볼	찻잎 거름망	주방/조리
+tea_cup_set2	찻잔 2P 세트	기본 찻잔 세트	주방/조리
+kettle_basic	전기포트 기본형	물 끓이는 전기포트	주방/조리
+teapot_warmer	티포트 워머	따뜻하게 유지하는 받침	주방/조리
+snow_shovel_basic	제설삽 기본형	눈 치우는 스노우 삽	계절/겨울
+snow_shovel_foldable	접이식 제설삽	휴대 가능한 접이식 삽	계절/겨울
+ice_scraper	성에 제거 스크래퍼	차량/유리 성에 제거	계절/겨울
+snow_melt_salt	제설용 염화칼슘	빙판 방지 제설제	계절/겨울
+winter_gloves	방한 장갑	겨울용 장갑	계절/겨울
+hand_warmer_pack	핫팩	휴대용 손난로 핫팩	계절/겨울
+grain_grinder_small	곡물 그라인더 소형	콩/곡물 분쇄용 그라인더	주방/가전
+blender_basic	블렌더 기본형	음료/재료 분쇄 블렌더	주방/가전
+mini_chopper	미니 다지기	재료 다지는 전동 다지기	주방/가전
+coffee_grinder_manual	수동 그라인더	수동 분쇄 그라인더	주방/가전
+strainer_fine	고운 체	분쇄 후 거르는 체	주방/가전
+measuring_cup_set	계량컵 세트	조리 계량 도구 세트	주방/가전
+gel_pen_black	젤펜(검정)	부드러운 필기 젤펜	문구/사무
+fountain_pen_basic	만년필 기본형	입문용 만년필	문구/사무
+sign_pen_black	사인펜(검정)	부드러운 사인펜	문구/사무
+pencil_set	연필 세트	필기용 연필 구성	문구/사무
+highlighter_set	형광펜 세트	강조용 하이라이터	문구/사무
+mechanical_pencil	샤프펜슬	0.5mm 샤프	문구/사무
+pink_letter_set_aesthetic	감성 편지 세트 핑크	핑크 편지지/봉투 구성	문구/사무
+letter_paper_basic	편지지 기본형	무지 편지지	문구/사무
+envelope_pink	핑크 봉투	핑크 색상 봉투	문구/사무
+sticker_seal_set	실링 스티커 세트	봉투 봉인 스티커	문구/사무
+gel_pen_pastel	파스텔 젤펜	감성 컬러 펜	문구/사무
+message_card_set	메시지 카드 세트	기념일 카드 구성	문구/사무
+potato_capsule_mask_pack	감자 캡슐팩	감자 성분 컨셉 캡슐 마스크팩	뷰티/스킨
+sheet_mask_basic	시트 마스크팩	기본 보습 마스크팩	뷰티/스킨
+moisture_mask_pack	수분 마스크팩	수분 집중 케어	뷰티/스킨
+clay_mask_tube	클레이 마스크	모공 관리 클레이	뷰티/스킨
+nose_pack_strips	코팩 스트립	피지 관리 코팩	뷰티/스킨
+capsule_mask_mix	캡슐팩 믹스	캡슐팩 혼합 구성	뷰티/스킨
+bath_drain_strainer_stainless	욕조용 스텐 배수구 망	머리카락 거름 배수망	욕실/청소
+bath_drain_plug	욕조 배수 마개	물막이 배수 플러그	욕실/청소
+sink_strainer_stainless	싱크대 스텐 거름망	싱크 배수망	욕실/청소
+hair_catcher_sticker	배수구 머리카락 스티커	일회용 캐처 스티커	욕실/청소
+drain_cleaner_brush	배수구 청소솔	배수관 청소 브러시	욕실/청소
+bath_strainer_large	대형 욕조 거름망	대구경 거름망	욕실/청소
+scissors_office_small_black	오피스 블랙코팅 가위(소형)	사무용 소형 가위	문구/사무
+scissors_office_medium	사무용 가위(중형)	기본 중형 가위	문구/사무
+scissors_kids_safe	어린이 안전가위	안전날 어린이가위	문구/사무
+scissors_craft	공예용 가위	정밀 커팅 가위	문구/사무
+scissors_left_hand	왼손 가위	왼손잡이용 가위	문구/사무
+scissors_cover_case	가위 캡 케이스	휴대용 안전 캡	문구/사무
+bath_scrub_sponge_set_10	욕실 청소 스펀지 10개입	욕실용 대용량 스펀지	욕실/청소
+bath_scrub_brush	욕실 청소 브러시	타일/줄눈 브러시	욕실/청소
+magic_cleaning_block	매직 블럭	물때 제거 스펀지	욕실/청소
+shower_squeegee	샤워부스 스퀴지	물기 제거 도구	욕실/청소
+bath_cleaner_spray	욕실 세정제 스프레이	욕실 전용 세정제	욕실/청소
+gloves_cleaning_rubber	청소용 고무장갑	욕실 청소 장갑	욕실/청소
+design_trashbin_tornado	토네이도 휴지통	디자인 포인트 쓰레기통	생활/정리
+trashbin_basic_10l	기본 휴지통 10L	사무/가정용 휴지통	생활/정리
+trashbin_pedal	페달 휴지통	발로 여닫는 페달형	생활/정리
+trashbin_mini	미니 휴지통	책상용 소형 휴지통	생활/정리
+recycle_bin_dual	분리수거함 2칸	2칸 분리 수거함	생활/정리
+trashbag_small	소형 쓰레기봉투	휴지통용 봉투	생활/정리
+mini_tissue_230	헬로 미니티슈 230매	휴대용 미니 각티슈	생활/소모품
+pocket_tissue_10pack	포켓티슈 10입	휴대용 티슈 묶음	생활/소모품
+wet_tissue_small	휴대용 물티슈	소형 물티슈	생활/소모품
+tissue_case_portable	티슈 케이스	휴대용 케이스	생활/소모품
+napkin_pack	냅킨	간편 냅킨	생활/소모품
+kitchen_towel_roll	키친타월 롤	주방용 타월	생활/소모품
+underwear_organizer_8cell	속옷정리함 8칸	서랍용 칸막이 정리함	생활/정리
+underwear_organizer_12cell	속옷정리함 12칸	더 촘촘한 12칸 구성	생활/정리
+drawer_divider_set	서랍 칸막이 세트	가변형 칸막이	생활/정리
+sock_organizer	양말 정리함	양말 전용 정리칸	생활/정리
+bra_organizer	브라 정리함	브라/속옷 분리 수납	생활/정리
+closet_storage_box	옷장 수납박스	의류 수납 박스	생활/정리
+corn_mesh_scrubber	옥수수 망사 수세미	친환경 망사 수세미	주방/청소
+eco_scrubber_loofah	천연 수세미(루파)	천연 루파 수세미	주방/청소
+scrubber_soft_sponge	부드러운 스펀지	코팅팬용 스펀지	주방/청소
+steel_scrubber	철 수세미	강한 오염용 철수세미	주방/청소
+dish_washing_gloves	설거지 장갑	주방용 장갑	주방/청소
+dish_cleaner_liquid	주방 세제	액상 주방세제	주방/청소
+monitor_memo_board_30cm	모니터 메모 보드 30cm	모니터 옆 부착 메모판	문구/사무
+sticky_note_pack	포스트잇 묶음	점착 메모지 세트	문구/사무
+mini_whiteboard_stick	부착 미니 화이트보드	붙이는 화이트보드	문구/사무
+pen_holder_clip	클립형 펜홀더	모니터 부착 펜 거치	문구/사무
+cable_clip_set	케이블 클립	모니터/책상 선 정리	문구/사무
+desk_organizer_small	데스크 정리함	책상 소품 정리	문구/사무
+tumbler_cleaner_tablet	발포 텀블러 세척제	뜨거운물에 녹는 발포 세정제	주방/청소
+bottle_brush_long	롱 보틀 브러시	텀블러 내부 세척 솔	주방/청소
+straw_cleaner_brush	빨대 세척솔	빨대 전용 브러시	주방/청소
+dishwasher_tablet	식기세척기 세제	타블렛형 세제	주방/청소
+descaler_kettle	석회 제거제	주전자 물때 제거용	주방/청소
+microfiber_cloth_set	극세사 행주 세트	주방 닦이 천	주방/청소
+mouse_trap_glue_board	쥐 끈끈이 트랩	바닥 부착형 포획 트랩	해충/방역
+mouse_trap_snap	스냅형 쥐덫	기계식 스냅 트랩	해충/방역
+rodent_bait_box	쥐 유인 먹이통	유인형 베이트 박스	해충/방역
+pest_sanitation_spray	방역 소독 스프레이	실내용 방역 스프레이	해충/방역
+hole_blocking_putty	틈새 차단 퍼티	쥐/벌레 유입 차단	해충/방역
+trap_disposable_gloves	방역용 장갑	트랩 처리용 일회용 장갑	해충/방역
+car_deodorizer_spray	차량용 탈취제 스프레이	차량 냄새 제거 탈취제	자동차용품
+car_air_freshener_clip	송풍구 방향제	클립형 차량 방향제	자동차용품
+car_charcoal_bag	차량 숯 탈취팩	숯 기반 탈취 팩	자동차용품
+odor_remover_gel	탈취 젤	실내용/차량용 겸용 젤	자동차용품
+car_wet_wipes	차량용 물티슈	실내 청소용 물티슈	자동차용품
+car_floor_mat_cleaner	매트 클리너	차량 매트 청소용	자동차용품
+notebook_a5_grid	공책(A5 그리드)	A5 격자 노트	문구/사무
+notebook_b5_line	공책(B5 라인)	B5 줄노트	문구/사무
+memo_pad	메모지 패드	뜯어쓰는 메모패드	문구/사무
+planner_weekly	주간 플래너	주간 계획 노트	문구/사무
+sticky_index_tab	인덱스 탭	페이지 표시 탭	문구/사무
+ring_notebook	링 노트	스프링 링 노트	문구/사무
+eyebrow_scissors	눈썹 가위	눈썹 정리 가위	뷰티/미용
+eyebrow_razor	눈썹 칼	눈썹 정리 면도칼	뷰티/미용
+tweezers_basic	쪽집게	눈썹/잔털 제거용	뷰티/미용
+eyebrow_trimmer	전동 눈썹 트리머	전동 정리 도구	뷰티/미용
+mirror_mini	미니 거울	휴대용 거울	뷰티/미용
+eyebrow_pencil	아이브로우 펜슬	눈썹 메이크업 펜슬	뷰티/미용
+cash_envelope_basic	현금 봉투	경조사용 현금 봉투	문구/사무
+envelope_white	흰 봉투	기본 봉투	문구/사무
+gift_envelope_set	경조사 봉투 세트	축의/부의 봉투 세트	문구/사무
+calligraphy_pen	붓펜	봉투 글씨용 붓펜	문구/사무
+sticker_name_label	이름 스티커	봉투용 라벨	문구/사무
+small_card_blank	무지 카드	메시지 카드	문구/사무
+clothing_pin_safety	옷핀	의류 고정용 안전핀	생활/잡화
+sewing_kit_basic	기본 바느질 세트	리폼/수선용 키트	생활/잡화
+fabric_tape_double	원단 양면테이프	임시 고정용 테이프	생활/잡화
+needle_thread_set	바늘 실 세트	기본 바늘/실 구성	생활/잡화
+button_set	단추 세트	수선용 단추 모음	생활/잡화
+measuring_tape	줄자	재단/리폼 측정용	생활/잡화
+lint_roller_basic	롤 클리너	먼지 제거 점착 롤	생활/청소
+lint_roller_refill_tape	테이프 클리너 리필	롤 클리너 리필 테이프	생활/청소
+lint_brush	의류 먼지 브러시	재사용 먼지 제거 브러시	생활/청소
+pet_hair_remover	반려동물 털 제거기	털 제거 스퀴지/도구	생활/청소
+adhesive_tape_wide	점착 테이프(와이드)	먼지 제거용 점착 테이프	생활/청소
+storage_roller_holder	롤 클리너 거치대	보관용 홀더	생활/청소
+meat_tongs_stainless	고기 집게(스텐)	바베큐/조리용 스텐 집게	주방/조리
+tongs_silicone	실리콘 집게	코팅팬용 실리콘 집게	주방/조리
+tongs_long_bbq	롱 바베큐 집게	긴 길이 그릴 집게	주방/조리
+grill_pan	그릴팬	고기 굽는 팬	주방/조리
+oil_splash_guard	기름 튐 방지망	튀김/구이용 가드	주방/조리
+kitchen_gloves_heat	내열 장갑	뜨거운 조리용 장갑	주방/조리
+blind_hook_curtain_tie	커튼 고정 후크	발/커튼 고정용 후크	인테리어
+curtain_tieback	커튼 끈 타이백	커튼 묶는 타이백	인테리어
+hook_adhesive	접착 후크	무타공 접착형 후크	인테리어
+blind_chain_holder	블라인드 체인 홀더	체인 고정 홀더	인테리어
+rod_bracket	커튼봉 브라켓	설치용 브라켓	인테리어
+window_clip	창문 클립	간단 고정 클립	인테리어
+s_pen_compatible_stylus	S펜 호환 터치펜	갤럭시탭 호환 스타일러스	전자/디지털
+stylus_universal	범용 터치펜	범용 정전식 터치펜	전자/디지털
+screen_cleaner_kit	화면 클리너 키트	태블릿 화면 청소 도구	전자/디지털
+tablet_stand	태블릿 거치대	각도 조절 거치대	전자/디지털
+replacement_nibs	스타일러스 펜촉	교체용 펜촉	전자/디지털
+palm_rejection_glove	드로잉 장갑	손바닥 오작동 방지 장갑	전자/디지털
+shoe_rain_cover_silicone	신발 방수 커버(실리콘)	비 오는 날 방수 덮개	생활/잡화
+shoe_waterproof_spray	방수 스프레이	신발 방수 코팅 스프레이	생활/잡화
+umbrella_basic	우산 기본형	일반 우산	생활/잡화
+raincoat_disposable	일회용 우비	비상용 우비	생활/잡화
+boot_rain_cover	부츠형 레인커버	긴 형태의 레인 커버	생활/잡화
+shoe_dryer_pack	신발 건조제	습기 제거 건조제	생활/잡화
+parchment_paper_roll	종이 호일 롤	오븐/팬용 종이호일	주방/조리
+aluminum_foil_roll	알루미늄 호일	구이/보관용 호일	주방/조리
+cooking_sheet	쿠킹 시트	재사용 베이킹 시트	주방/조리
+oil_absorb_paper	기름 흡수지	튀김 기름 제거용	주방/조리
+baking_tray	베이킹 트레이	오븐 트레이	주방/조리
+food_wrap	랩	식품 포장 랩	주방/조리
+no_nail_hook_pin	꼬꼬핀/무타공 액자걸이	벽 손상 최소 액자 걸이 핀	생활/공구
+adhesive_hook_strong	강력 접착 후크	무타공 접착 후크	생활/공구
+picture_hanging_strip	액자 걸이 스트립	접착 스트립형	생활/공구
+mini_level	미니 수평계	액자 수평 맞춤 도구	생활/공구
+tape_measure_mini	미니 줄자	설치 측정용	생활/공구
+wall_protector_pad	벽 보호 패드	접착 흔적 최소 패드	생활/공구
+bubble_wrap_insulation	에어캡(뽁뽁이) 단열 시트	포장/보온용 에어캡	포장/자재
+bubble_wrap_roll	에어캡 롤	대형 롤 에어캡	포장/자재
+packing_tape_clear	투명 박스테이프	포장용 테이프	포장/자재
+cushion_paper	완충 종이	포장 완충재	포장/자재
+thermal_insulation_film	단열 필름	창문 보온 필름	포장/자재
+box_cutter	커터칼	포장 개봉용 커터	포장/자재
+chair_leg_cover_felt	의자 발커버(펠트)	바닥 소음 감소 펠트 커버	생활/정리
+chair_leg_silicone	의자발 실리콘 커버	실리콘 재질 커버	생활/정리
+floor_protector_pad	바닥 보호 패드	가구 다리 패드	생활/정리
+tennis_ball_cover	테니스공 의자발커버	의자 끌기 소음 완화	생활/정리
+anti_slip_mat	미끄럼방지 매트	가구/러그 고정	생활/정리
+felt_sheet_roll	펠트 시트 롤	재단용 펠트	생활/정리
+closet_dehumidifier_box	옷장용 제습제(습기제거제)	물먹는 타입 제습제	생활/소모품
+dehumidifier_hanger	걸이형 제습제	옷장 걸이형 제습	생활/소모품
+mold_remover_spray	곰팡이 제거제	곰팡이 제거 스프레이	생활/소모품
+humidity_meter_mini	미니 습도계	실내 습도 확인	생활/소모품
+closet_fragrance_sachet	옷장 방향 사쉐	옷장 향 관리	생활/소모품
+silica_gel_pack	실리카겔 제습팩	소형 제습 팩	생활/소모품

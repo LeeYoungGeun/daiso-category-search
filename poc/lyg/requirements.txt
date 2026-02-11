@@ -1,0 +1,11 @@
+pyyaml>=6.0
+python-dotenv>=1.0.0
+numpy>=1.26
+rich>=13.7
+
+# Providers
+openai>=1.0.0
+google-genai>=1.0.0
+
+# Optional: only needed when using vendor-set that requires Cohere rerank
+cohere>=5.0.0

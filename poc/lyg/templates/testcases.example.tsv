@@ -1,0 +1,4 @@
+# id	raw_text	intent_text	expected_doc_ids	expected_category	needs_clarification	notes
+Q001	욕실에 미끄럼방지 매트 있어?	욕실/샤워실 바닥용 미끄럼 방지 매트를 찾는다	P-101|P-102	bathroom_mat	false	욕실 매트 vs 요가 매트 혼동 방지
+Q002	매트 어디있어?	매트(욕실/요가/현관) 중 어떤 종류를 찾는지 확인이 필요			true	애매함 케이스(꼬리질문)
+Q003	안녕하세요	인삿말(검색 불필요)			true	검색으로 보내지 말 것

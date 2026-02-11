@@ -1,0 +1,135 @@
+[2026-02-10 15:27:13.878588] [2b891fca-69e9-499b-9a44-382eb9cc1f92] Analyzing: 욕실 매트 어디 있어요? | History: 0 turns
+[2026-02-10 15:27:16.804434] [2b891fca-69e9-499b-9a44-382eb9cc1f92] Error: 
+  No API_KEY or ADC found. Please either:
+    - Set the `GOOGLE_API_KEY` environment variable.
+    - Manually pass the key with `genai.configure(api_key=my_api_key)`.
+    - Or set up Application Default Credentials, see https://ai.google.dev/gemini-api/docs/oauth for more information.
+[2026-02-10 15:42:52.737664] [54192d97-b852-4893-bfe8-239dc2a0204b] Analyzing: 욕실 매트 어디 있어요? | History: 0 turns
+[2026-02-10 15:42:57.743409] [54192d97-b852-4893-bfe8-239dc2a0204b] Error: 
+[2026-02-10 15:42:57.743923] [f9ff673a-7e34-4a96-9536-a838f7b2d3eb] Analyzing: 건전지 찾아줘 | History: 0 turns
+[2026-02-10 15:43:03.179283] [761fecd5-49cf-4319-be28-f5919062cbf2] Analyzing: 화장지 | History: 0 turns
+[2026-02-10 15:43:08.181928] [761fecd5-49cf-4319-be28-f5919062cbf2] Error: 
+[2026-02-10 15:43:08.182927] [f454af39-4704-431e-a9cc-75cdc496658e] Analyzing: 안녕하세요 | History: 0 turns
+[2026-02-10 15:45:39.275281] [b9c4f514-845d-4a46-85a5-d9a3ddd75002] Analyzing: 욕실 매트 어디 있어요? | History: 0 turns
+[2026-02-10 15:45:44.287346] [b9c4f514-845d-4a46-85a5-d9a3ddd75002] Error: 
+[2026-02-10 15:45:44.288121] [9ea0837d-78c3-41a9-bc84-867346148933] Analyzing: 건전지 찾아줘 | History: 0 turns
+[2026-02-10 15:45:49.304597] [9ea0837d-78c3-41a9-bc84-867346148933] Error: 
+[2026-02-10 15:45:49.304597] [3324ba07-d2eb-45ec-8573-bb9df1c1371e] Analyzing: 화장지 | History: 0 turns
+[2026-02-10 15:45:54.313387] [3324ba07-d2eb-45ec-8573-bb9df1c1371e] Error: 
+[2026-02-10 15:45:54.313903] [9b31333a-3556-4f59-be17-70549814cb12] Analyzing: 안녕하세요 | History: 0 turns
+[2026-02-10 15:52:04.845989] [20fd3314-c8fb-4693-b704-afe50741d403] Analyzing: 욕실 매트 어디 있어요? | History: 0 turns
+[2026-02-10 15:52:04.845989] [20fd3314-c8fb-4693-b704-afe50741d403] Error: No module named 'google.generativeai'
+[2026-02-10 15:52:04.846999] [209c5d5f-7738-4bea-b6c7-a2c9dbcc40de] Analyzing: 건전지 찾아줘 | History: 0 turns
+[2026-02-10 15:52:04.846999] [209c5d5f-7738-4bea-b6c7-a2c9dbcc40de] Error: No module named 'google.generativeai'
+[2026-02-10 15:52:04.847520] [af0b73a3-d96f-450c-8381-1d2af70b0c83] Analyzing: 화장지 | History: 0 turns
+[2026-02-10 15:52:04.847520] [af0b73a3-d96f-450c-8381-1d2af70b0c83] Error: No module named 'google.generativeai'
+[2026-02-10 15:52:04.848517] [0aa2998e-ffe2-47e0-a7d3-54e39582504c] Analyzing: 안녕하세요 | History: 0 turns
+[2026-02-10 15:52:04.848517] [0aa2998e-ffe2-47e0-a7d3-54e39582504c] Error: No module named 'google.generativeai'
+[2026-02-10 15:53:13.248633] [460bda6b-00fc-4854-80b4-4af47b949faa] Analyzing: 욕실 매트 어디 있어요? | History: 0 turns
+[2026-02-10 15:53:13.248633] [460bda6b-00fc-4854-80b4-4af47b949faa] Error: No module named 'google.generativeai'
+[2026-02-10 15:53:13.249634] [7c26dd2a-279b-49b5-b2b2-6f7461d75d59] Analyzing: 건전지 찾아줘 | History: 0 turns
+[2026-02-10 15:53:13.249634] [7c26dd2a-279b-49b5-b2b2-6f7461d75d59] Error: No module named 'google.generativeai'
+[2026-02-10 15:53:13.250635] [c4c98fc4-3f51-47b7-af94-0fe2d0554331] Analyzing: 화장지 | History: 0 turns
+[2026-02-10 15:53:13.250635] [c4c98fc4-3f51-47b7-af94-0fe2d0554331] Error: No module named 'google.generativeai'
+[2026-02-10 15:53:13.250635] [9f0aae6c-58b0-441a-9a84-85f6d065b694] Analyzing: 안녕하세요 | History: 0 turns
+[2026-02-10 15:53:13.251634] [9f0aae6c-58b0-441a-9a84-85f6d065b694] Error: No module named 'google.generativeai'
+[2026-02-10 15:57:39.060044] [13840176-9e55-4322-8dd5-7e91ce074d21] Analyzing: 욕실 매트 어디 있어요? | History: 0 turns
+[2026-02-10 15:57:39.287481] [13840176-9e55-4322-8dd5-7e91ce074d21] Error: 404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-2.0-flash-exp is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}
+[2026-02-10 15:57:39.287481] [f4e28690-6f3c-4fa3-85d6-b11ae47ec4dc] Analyzing: 건전지 찾아줘 | History: 0 turns
+[2026-02-10 15:57:39.395106] [f4e28690-6f3c-4fa3-85d6-b11ae47ec4dc] Error: 404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-2.0-flash-exp is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}
+[2026-02-10 15:57:39.395106] [950888c7-1888-4ad7-b215-8c34b12d402f] Analyzing: 화장지 | History: 0 turns
+[2026-02-10 15:57:39.499821] [950888c7-1888-4ad7-b215-8c34b12d402f] Error: 404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-2.0-flash-exp is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}
+[2026-02-10 15:57:39.500891] [1a7fa32f-b0e6-4ded-a5e8-da86bf5d03c9] Analyzing: 안녕하세요 | History: 0 turns
+[2026-02-10 15:57:39.598790] [1a7fa32f-b0e6-4ded-a5e8-da86bf5d03c9] Error: 404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-2.0-flash-exp is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}
+[2026-02-10 15:58:06.076341] [6c696ff9-5587-4977-bb29-621542b5e82c] Analyzing: 욕실 매트 어디 있어요? | History: 0 turns
+[2026-02-10 15:58:09.679749] [6f33c5bd-e650-432a-973c-c605763d0ffb] Analyzing: 건전지 찾아줘 | History: 0 turns
+[2026-02-10 15:58:12.754698] [fb3d2850-8660-40c1-beef-22b852fa1bf8] Analyzing: 화장지 | History: 0 turns
+[2026-02-10 15:58:16.004548] [e1e12317-fe6d-4e03-9da9-074d594a75d9] Analyzing: 안녕하세요 | History: 0 turns
+[2026-02-10 15:59:00.190651] [ddf3f9ba-839b-4e05-a6bb-2a787915c31d] Analyzing: 욕실 매트 어디 있어요? | History: 0 turns
+[2026-02-10 15:59:03.552802] [e8552d46-ed63-438b-845c-8fb32ee906dc] Analyzing: 건전지 찾아줘 | History: 0 turns
+[2026-02-10 15:59:06.626340] [062a1354-8c6f-4fd9-ab7c-43b34581c69c] Analyzing: 화장지 | History: 0 turns
+[2026-02-10 15:59:09.869584] [8b887f44-180e-4ec8-b8b1-9a096e4ee901] Analyzing: 안녕하세요 | History: 0 turns
+[2026-02-10 16:03:28.616701] [7f15ef1d-3ae0-4a4b-8769-223ee4e1efc3] Analyzing: 욕실 매트 어디 있어요? | History: 0 turns
+[2026-02-10 16:03:32.279942] [964e8eb8-b628-4d30-a29a-f49ad105d374] Analyzing: 건전지 찾아줘 | History: 0 turns
+[2026-02-10 16:03:35.519013] [0f04c401-036c-4d86-ae65-0ea7f5af1cd8] Analyzing: 화장지 | History: 0 turns
+[2026-02-10 16:03:38.602503] [7100d064-849d-4910-b299-7ff96f5a4e3f] Analyzing: 안녕하세요 | History: 0 turns
+[2026-02-10 16:57:37.089947] [899c0cd1-88ff-4afe-a9f7-a5ec885657d7] Analyzing: 파란색 볼펜 | History: 0 turns
+[2026-02-10 16:57:41.287625] [096e1c42-cf8b-46e0-863d-cf6203d4270b] Analyzing: 청소 | History: 0 turns
+[2026-02-10 16:57:44.031117] [925eef50-ef09-465d-9427-d7dfddf66740] Analyzing: 그거 | History: 4 turns
+[2026-02-10 16:57:48.154584] [8ee83a9e-dc5a-420f-8ac7-b338f7d39a78] Analyzing: 건전지 | History: 0 turns
+[2026-02-10 16:59:28.982561] [f6b21083-81f5-45fb-a761-0fd8fe1d73f7] Analyzing: 파란색 볼펜 | History: 0 turns
+[2026-02-10 16:59:33.759748] [b1582f68-b8e7-4c06-aeb9-780c205c918f] Analyzing: 청소 | History: 0 turns
+[2026-02-10 16:59:36.720721] [34082493-2133-409b-aa72-2f2b47e98f78] Analyzing: 그거 | History: 4 turns
+[2026-02-10 16:59:40.723348] [c73b3ea0-2b2c-480d-8b37-14b3996f1333] Analyzing: 건전지 | History: 0 turns
+[2026-02-10 17:00:49.397186] [ec90f880-2f67-49d0-8543-fd46b9ab6d26] Analyzing: 파란색 볼펜 | History: 0 turns
+[2026-02-10 17:00:53.968129] [3e55265a-6792-41c2-88d1-d1be28b2d4af] Analyzing: 청소 | History: 0 turns
+[2026-02-10 17:00:56.849233] [048d6d84-8bc0-4efc-b60d-c31bb9667968] Analyzing: 그거 | History: 4 turns
+[2026-02-10 17:01:00.946832] [0e83faa2-1928-4fc9-b001-e65fced5bd87] Analyzing: 건전지 | History: 0 turns
+[2026-02-10 17:01:54.441825] [8823bce6-045b-40d5-89ff-e4281167e02f] Analyzing: 파란색 볼펜 | History: 0 turns
+[2026-02-10 17:01:59.251366] [54d77caf-5e76-4187-8ecd-8f3999c3f517] Analyzing: 청소 | History: 0 turns
+[2026-02-10 17:02:01.930679] [f87aa4f0-16ed-4f01-be87-9b084cee12c1] Analyzing: 그거 | History: 4 turns
+[2026-02-10 17:02:06.203924] [ab53cb50-4aba-428e-ad30-5c1edd2c7ed1] Analyzing: 건전지 | History: 0 turns
+[2026-02-10 17:03:42.461190] [7c398916-ff3c-4117-a6d9-6a08ccd09214] Analyzing: 파란색 볼펜 | History: 0 turns
+[2026-02-10 17:03:46.815843] [16cae4bc-09e4-4fbe-a5b9-cc55d6ea81f7] Analyzing: 청소 | History: 0 turns
+[2026-02-10 17:03:49.533644] [50fdc852-b86d-490c-a173-064ba7e84703] Analyzing: 그거 | History: 4 turns
+[2026-02-10 17:03:53.890129] [067dc841-8ac3-4209-a848-eed90799b67a] Analyzing: 건전지 | History: 0 turns
+[2026-02-10 17:04:49.595072] [dcfcde32-5515-4013-9520-db859b2e3287] Analyzing: 파란색 볼펜 | History: 0 turns
+[2026-02-10 17:04:54.224648] [bd867d6d-284b-48bd-a2f0-8c71b9183b8b] Analyzing: 청소 | History: 0 turns
+[2026-02-10 17:04:57.027873] [2f7483e6-0e33-4ae8-8cdb-f834975db097] Analyzing: 그거 | History: 4 turns
+[2026-02-10 17:05:01.134704] [648dcefa-6ee4-4c51-8b2e-7a8d7fd65a85] Analyzing: 건전지 | History: 0 turns
+[2026-02-10 20:18:31.507429] [2177b0cd-5369-4dc1-a58e-ea7efb4b3518] Analyzing: 욕실 매트 | History: 0 turns
+[2026-02-10 20:18:43.296689] [5be95dd7-0255-4f00-8e25-c345c37573ad] Analyzing: 욕실/청소 (욕실 매트, 욕실 매트 소형) | History: 3 turns
+[2026-02-10 20:18:54.671844] [86d16bcf-fe84-4d7c-bacf-5b2ea0953bd1] Analyzing: 욕실매트 어디있어? | History: 3 turns
+[2026-02-10 20:19:03.225111] [e9ef45a8-4ce3-4600-9bfa-60224f934ec1] Analyzing: 욕실매트 어디있어 | History: 3 turns
+[2026-02-10 20:19:12.978480] [e98cda9b-5c76-4502-ae09-895de7665ffd] Analyzing: 욕실메트 | History: 3 turns
+[2026-02-10 20:19:17.112842] [4d794350-5b7a-4a60-8c3b-f5fbaf784836] Analyzing: 욕실매트 | History: 3 turns
+[2026-02-10 20:19:38.200167] [166ff610-a8c0-4711-ba6a-113a323dc4f9] Analyzing: 욕실 | History: 0 turns
+[2026-02-10 20:19:45.505061] [adf987e4-37a7-484b-8053-b382751c05de] Analyzing: 생활/잡화 (욕실 러그 발판, 욕실 러그 발판 대형) | History: 3 turns
+[2026-02-10 20:19:49.328524] [760ca917-8a52-4172-a48a-a47574dcbd2a] Analyzing: 욕실 | History: 3 turns
+[2026-02-10 20:19:53.728725] [520ba7d4-10cf-4c1d-a62f-4702ccfe909f] Analyzing: 욕실 | History: 3 turns
+[2026-02-10 20:20:00.899460] [4a7aaecd-74b7-4c31-8801-e2ef3e6597e6] Analyzing: 욕실매트 | History: 0 turns
+[2026-02-10 20:20:14.865370] [ad810f4c-ba4b-4cd4-a67c-5755adf3743f] Analyzing: 욕실/청소 (욕실 매트, 욕실 매트 대형) | History: 3 turns
+[2026-02-10 20:20:24.049799] [393909e2-8747-446c-a40d-f17c749e332e] Analyzing: 욕실매트 어디있어? | History: 0 turns
+[2026-02-10 20:20:34.233253] [90638db1-cdf8-4eec-9faa-03604edd3335] Analyzing: 스포츠/레저 (요가 매트) | History: 3 turns
+[2026-02-10 20:20:42.298550] [dff5e82a-7c3c-4d61-8791-50e6069070bd] Analyzing: 생활 상품 찾아줘 | History: 0 turns
+[2026-02-10 20:21:47.769567] [91b3595c-4cb5-4034-ba60-3d2cd91f1fcc] Analyzing: 구멍있는 트레이 찾아줘 | History: 0 turns
+[2026-02-10 20:22:49.848361] [ab36ccb6-e97e-4ddc-ac16-b0b8eda86d35] Analyzing: 그 뭐냐? 욕실에 구멍있는 칫솔꽂이같은거 | History: 0 turns
+[2026-02-10 20:23:38.431316] [fc1f3be3-5575-4a32-8eb7-6e9815a345b3] Analyzing: 그 뭐냐 스킨이랑 로션한번에 되있는거? | History: 0 turns
+[2026-02-10 20:34:48.220512] [35934617-da59-49c0-bdcf-648f9aed3958] Analyzing: 세탁세제 | History: 0 turns
+[2026-02-10 20:35:04.878989] [ff89ae2a-da01-4257-80a6-bbf97247e201] Analyzing: ddd | History: 0 turns
+[2026-02-10 20:42:39.894293] [b332dfb1-f51d-45b0-8de1-5805a7211a41] Analyzing: 욕실 매트 어디있어? | History: 0 turns
+[2026-02-10 20:44:55.491991] [cb92a02a-4521-47f9-b75b-f9d717e3db05] Analyzing: 고양이 화장실 자동 청소하는거 | History: 0 turns
+[2026-02-10 20:45:15.003435] [2add986d-ab38-47a3-97bc-85715630b43b] Analyzing: 문구 상품 찾아줘 | History: 0 turns
+[2026-02-10 20:45:25.461898] [79c14df5-468b-4bd1-ac93-80f1259b07b7] Analyzing: 문구/사무 (가위, 사과 캐릭터 볼펜) | History: 3 turns
+[2026-02-10 20:46:12.722086] [2e589b56-75d0-4355-8248-432eabdb07f1] Analyzing: 그 세꼰마인가 있어? | History: 3 turns
+[2026-02-10 20:46:19.434041] [b312d517-2dca-4206-b03b-f05d3ee6e008] Analyzing: 세꼼마 있어? | History: 3 turns
+[2026-02-10 20:46:35.954255] [efd37701-ada9-4779-9680-195309447389] Analyzing: 그 옷 빨때 쓰는거 있자나 | History: 3 turns
+[2026-02-10 20:46:42.896196] [737a3625-1f2d-40ad-a984-4d55e81f8bca] Analyzing: 욕실매트 | History: 3 turns
+[2026-02-10 20:47:04.402273] [c833913f-8040-46b7-894d-61c364bfb226] Analyzing: 세꼰마 | History: 0 turns
+[2026-02-10 20:47:43.932152] [09ccc74d-58a7-4667-9bd7-f9352cff1236] Analyzing: 그 뭐냐? 젓가락 숟가락 받침 | History: 0 turns
+[2026-02-10 20:50:56.133352] [a8a0c8b8-756d-4bf9-a678-3e8225c1e40e] Analyzing: 그 사과 칼 주세요 | History: 0 turns
+[2026-02-10 20:51:11.072978] [3c4bddb7-44a9-47d3-b4e9-c61af46a798c] Analyzing: 사과 케이스 있어요? | History: 0 turns
+[2026-02-10 20:51:31.051134] [446c67ea-1a20-41d2-961e-05390a2536b7] Analyzing: 투명색 수납 틀 있어요? | History: 0 turns
+[2026-02-10 20:51:55.248731] [4bebc18e-6f59-4909-a00d-f23637f36c0b] Analyzing: 딸기맛 과자 있어요? | History: 0 turns
+[2026-02-10 20:52:12.559023] [27e717bf-f239-4273-b879-4c4e5cc89c19] Analyzing: 욕실용 칫솔 꽂이 밑에 구멍 있는거 있어요?  | History: 0 turns
+[2026-02-10 21:00:48.688970] [1f6add5b-f90c-4aea-9cfc-ed1932d93e02] Analyzing: 욕실용 칫솔 꽂이 밑에 구멍 있는거 있어요?  | History: 0 turns
+[2026-02-10 21:00:48.690971] [5255aca6-f403-4104-803d-f532de69b506] Analyzing: 욕실용 칫솔 꽂이 밑에 구멍 있는거 있어요?  | History: 0 turns
+[2026-02-10 21:03:15.768483] [fb65bb84-4195-47f9-a9fe-b787aca219e2] Analyzing: 칫솔 꽂이 | History: 0 turns
+[2026-02-10 21:04:33.747656] [4be41de3-fbed-4dc2-9e76-5fa9790a9efc] Analyzing: 욕실용 칫솔 꽂이 밑에 구멍 있는거 있어요?] | History: 0 turns
+[2026-02-10 21:05:19.118699] [f6f30045-4a77-4217-a48e-f9a75bb557f6] Analyzing: 욕실아래 까는 매트 같은거 있어요? | History: 0 turns
+[2026-02-10 21:32:17.905100] [212f2602-b3c0-43c1-a3b3-18eba4adbc1c] Analyzing: 파란색 볼펜 | History: 0 turns
+[2026-02-10 21:32:22.363242] [5778ed44-aea9-4a41-aafb-a62b8dbde93c] Analyzing: 청소 | History: 0 turns
+[2026-02-10 21:32:25.128692] [09d9f930-ed62-4d3a-ab3d-92a477ce1fed] Analyzing: 그거 | History: 4 turns
+[2026-02-10 21:32:29.248487] [f5c65bd3-9c72-475a-95e7-33d4544c968a] Analyzing: 건전지 | History: 0 turns
+[2026-02-11 11:28:40.118204] [d9044fb5-f43a-448d-add4-a47573308107] Analyzing: 파란색 볼펜 | History: 0 turns
+[2026-02-11 11:28:44.282702] [a7c631cf-3708-49a0-a402-3702670ced06] Analyzing: 청소 | History: 0 turns
+[2026-02-11 11:28:46.931763] [fb95295d-0734-48cf-85ce-20f830cbc54b] Analyzing: 그거 | History: 4 turns
+[2026-02-11 11:28:50.942503] [0e9ff1ed-1e58-4985-92fd-4fe67a0c78bf] Analyzing: 건전지 | History: 0 turns
+[2026-02-11 11:32:16.939680] [2c9b0443-7096-4518-9bef-c4c45dbaf8c9] Analyzing: 파란색 볼펜 | History: 0 turns
+[2026-02-11 11:32:21.352488] [d71809ed-9367-453f-8d67-fb8fc11949bb] Analyzing: 청소 | History: 0 turns
+[2026-02-11 11:32:24.030026] [949a1fc5-3d64-4521-b70e-a899f2b944f3] Analyzing: 그거 | History: 4 turns
+[2026-02-11 11:32:27.846339] [14ae386b-7ec7-480e-842d-c2c148782e2b] Analyzing: 건전지 | History: 0 turns
+[2026-02-11 16:02:03.886263] [a65e2c70-05ed-461e-824a-607b1b4f4917] Analyzing: 칫솔꽂이 아래 구멍있는거 | History: 0 turns
+[2026-02-11 16:02:35.400968] [cb9a6583-77b6-4211-82ae-16b4f0564817] Analyzing: 물타슈 | History: 0 turns
+[2026-02-11 16:02:54.737357] [d5dab2b1-fcc8-447e-9e84-6463fe3a4189] Analyzing: 물티슈 | History: 0 turns
+[2026-02-11 16:03:11.520514] [8824a3b6-45ae-4124-8767-910587e7e386] Analyzing: 물틔슈 | History: 0 turns

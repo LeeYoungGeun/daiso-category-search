@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map Locations Debugger</title>
+    <!-- Update Cache Busting to V6 -->
+    <script src="./poc_v6_map_data.js?v=20260129_6"></script>
+    <style>
+        body {
+            font-family: 'Pretendard', sans-serif;
+            text-align: center;
+        }
+
+        .map-container {
+            position: relative;
+            display: inline-block;
+            margin: 20px;
+            border: 2px solid #ddd;
+        }
+
+        .map-img {
+            width: 500px;
+            display: block;
+        }
+
+        .marker {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            width: 10px;
+            height: 10px;
+            background: red;
+            border-radius: 50%;
+            border: 2px solid white;
+            z-index: 10;
+        }
+
+        .entrance-marker {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            width: 14px;
+            height: 14px;
+            background: blue;
+            border-radius: 50%;
+            border: 2px solid white;
+            z-index: 15;
+            box-shadow: 0 0 10px rgba(0, 0, 255, 0.5);
+        }
+
+        .label {
+            position: absolute;
+            transform: translate(-50%, -150%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-size: 10px;
+            white-space: nowrap;
+            z-index: 20;
+        }
+
+        .ent-label {
+            background: rgba(0, 0, 255, 0.8);
+            z-index: 21;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🗺️ Map Location Debugger (V6)</h1>
+    <p>Displays Shelves (Red) and All Entrances (Blue)</p>
+
+    <div id="maps-area"></div>
+
+    <script>
+        const mapsArea = document.getElementById("maps-area");
+
+        // Render for each floor
+        ['B1', 'B2'].forEach(floorKey => {
+            const floorInfo = mapData.floors[floorKey];
+            if (!floorInfo) return;
+
+            // Container
+            const wrapper = document.createElement("div");
+            wrapper.className = "map-container";
+
+            // Image
+            const img = document.createElement("img");
+            img.src = floorInfo.map;
+            img.className = "map-img";
+            wrapper.appendChild(img);
+
+            // Title
+            const title = document.createElement("h3");
+            title.innerText = floorKey + " Floor";
+            wrapper.prepend(title);
+
+            // Render Helper Function
+            const drawEntrance = (ent, name) => {
+                const marker = document.createElement("div");
+                marker.className = "entrance-marker";
+                marker.style.left = ent.x + "%";
+                marker.style.top = ent.y + "%";
+                wrapper.appendChild(marker);
+
+                const label = document.createElement("div");
+                label.className = "label ent-label";
+                label.innerText = (ent.label || "Entrance") + (name ? ` (${name})` : "");
+                label.style.left = ent.x + "%";
+                label.style.top = ent.y + "%";
+                wrapper.appendChild(label);
+            };
+
+            // 1. Entrances
+            if (floorInfo.entrances) {
+                // Draw all defined entrances
+                Object.entries(floorInfo.entrances).forEach(([key, ent]) => {
+                    drawEntrance(ent, key);
+                });
+            } else if (floorInfo.entrance) {
+                // Fallback for B2 etc if no list
+                drawEntrance(floorInfo.entrance, "");
+            }
+
+            // 2. Shelf Markers
+            Object.values(mapData.shelves).forEach(shelf => {
+                if (shelf.floor === floorKey) {
+                    // Dot
+                    const dot = document.createElement("div");
+                    dot.className = "marker";
+                    dot.style.left = shelf.x + "%";
+                    dot.style.top = shelf.y + "%";
+                    wrapper.appendChild(dot);
+
+                    // Label
+                    const label = document.createElement("div");
+                    label.className = "label";
+                    label.innerText = shelf.id + " " + shelf.section.split('(')[0];
+                    label.style.left = shelf.x + "%";
+                    label.style.top = shelf.y + "%";
+                    wrapper.appendChild(label);
+                }
+            });
+
+            mapsArea.appendChild(wrapper);
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,24 @@
+# 파이프라인 파라미터 예시
+
+pipeline_id: baseline_openai_qdrant_cohere
+
+stage2_vector_retrieval:
+  top_k: 50
+  filter: {}
+
+stage3_hybrid:
+  enabled: true
+  top_k: 50
+  alpha: 0.5   # sparse vs dense 가중 (엔진별 의미가 다를 수 있음)
+
+stage4_rerank:
+  enabled: true
+  top_n: 20
+
+stage5_filtering:
+  enabled: true
+  min_score:
+    fused: 0.25
+    rerank: 0.15
+  allow_categories: []
+  deny_terms: ["요가", "필라테스"]

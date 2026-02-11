@@ -1,0 +1,986 @@
+[
+    {
+        "id": "TC_01",
+        "query": "배터리",
+        "candidates_hint": [
+            "건전지",
+            "보조배터리",
+            "충전기"
+        ],
+        "ground_truth_ids_hint": [
+            "10",
+            "12",
+            "20"
+        ],
+        "scenario_type": "Synonym",
+        "expected_intent": {
+            "keywords": [
+                "배터리"
+            ],
+            "synonyms": [
+                "건전지"
+            ]
+        }
+    },
+    {
+        "id": "TC_02",
+        "query": "여행 갈 때 샴푸 담는 통",
+        "candidates_hint": [
+            "리필 용기",
+            "샴푸",
+            "여행 가방"
+        ],
+        "ground_truth_ids_hint": [
+            "201",
+            "202"
+        ],
+        "scenario_type": "Intent-based",
+        "expected_intent": {
+            "keywords": [
+                "여행",
+                "샴푸",
+                "통"
+            ],
+            "target": "리필 용기"
+        }
+    },
+    {
+        "id": "TC_03",
+        "query": "그.. 뽁뽁이",
+        "candidates_hint": [
+            "에어캡 단열시트",
+            "장난감",
+            "테이프"
+        ],
+        "ground_truth_ids_hint": [
+            "301"
+        ],
+        "scenario_type": "Visual Description",
+        "expected_intent": {
+            "keywords": [
+                "뽁뽁이"
+            ],
+            "target": "에어캡"
+        }
+    },
+    {
+        "id": "TC_04",
+        "query": "갤럭시 충전기",
+        "candidates_hint": [
+            "아이폰 케이블",
+            "건전지",
+            "선풍기"
+        ],
+        "ground_truth_ids_hint": [],
+        "scenario_type": "Distractor",
+        "expected_intent": {
+            "target": null
+        }
+    },
+    {
+        "id": "TC_05",
+        "query": "돌돌이",
+        "candidates_hint": [
+            "테이프 클리너",
+            "휴지",
+            "장난감"
+        ],
+        "ground_truth_ids_hint": [
+            "401"
+        ],
+        "scenario_type": "Synonym",
+        "expected_intent": {
+            "target": "테이프 클리너"
+        }
+    },
+    {
+        "id": "TC_06",
+        "query": "찍찍이 테이프",
+        "candidates_hint": [
+            "벨크로 타이",
+            "양면 테이프",
+            "박스 테이프"
+        ],
+        "ground_truth_ids_hint": [
+            "405"
+        ],
+        "scenario_type": "Synonym",
+        "expected_intent": {
+            "target": "벨크로"
+        }
+    },
+    {
+        "id": "TC_07",
+        "query": "음쓰 봉투",
+        "candidates_hint": [
+            "음식물 쓰레기 봉투",
+            "일반 쓰레기 봉투",
+            "지퍼백"
+        ],
+        "ground_truth_ids_hint": [
+            "501"
+        ],
+        "scenario_type": "Abbreviation",
+        "expected_intent": {
+            "target": "음식물 쓰레기 봉투"
+        }
+    },
+    {
+        "id": "TC_08",
+        "query": "변기 뚫는 거",
+        "candidates_hint": [
+            "뻥뚫어",
+            "변기 세정제",
+            "뚫어뻥"
+        ],
+        "ground_truth_ids_hint": [
+            "505"
+        ],
+        "scenario_type": "Intent-based",
+        "expected_intent": {
+            "target": "뚫어뻥"
+        }
+    },
+    {
+        "id": "TC_09",
+        "query": "설거지할 때 쓰는 장갑",
+        "candidates_hint": [
+            "고무장갑",
+            "니트릴 장갑",
+            "비닐 장갑"
+        ],
+        "ground_truth_ids_hint": [
+            "601"
+        ],
+        "scenario_type": "Intent-based",
+        "expected_intent": {
+            "target": "고무장갑"
+        }
+    },
+    {
+        "id": "TC_10",
+        "query": "돼지코",
+        "candidates_hint": [
+            "어댑터",
+            "변환 플러그",
+            "멀티탭"
+        ],
+        "ground_truth_ids_hint": [
+            "701"
+        ],
+        "scenario_type": "Visual Description",
+        "expected_intent": {
+            "target": "변환 플러그"
+        }
+    },
+    {
+        "id": "TC_11",
+        "query": "다이소 맥북",
+        "candidates_hint": [
+            "노트북 파우치",
+            "노트북 거치대",
+            "마우스"
+        ],
+        "ground_truth_ids_hint": [],
+        "scenario_type": "Distractor",
+        "expected_intent": {
+            "target": null
+        }
+    },
+    {
+        "id": "TC_12",
+        "query": "김치 담을 통",
+        "candidates_hint": [
+            "김치통",
+            "반찬통",
+            "유리병"
+        ],
+        "ground_truth_ids_hint": [
+            "801"
+        ],
+        "scenario_type": "Intent-based",
+        "expected_intent": {
+            "target": "김치통"
+        }
+    },
+    {
+        "id": "TC_13",
+        "query": "스카치 테이프 말고 종이 테이프",
+        "candidates_hint": [
+            "마스킹 테이프",
+            "스카치 테이프",
+            "양면 테이프"
+        ],
+        "ground_truth_ids_hint": [
+            "410"
+        ],
+        "scenario_type": "Negative",
+        "expected_intent": {
+            "target": "마스킹 테이프",
+            "negative": "스카치 테이프"
+        }
+    },
+    {
+        "id": "TC_14",
+        "query": "아이들이 좋아하는 간식",
+        "candidates_hint": [
+            "젤리",
+            "초콜릿",
+            "강아지 껌"
+        ],
+        "ground_truth_ids_hint": [
+            "901",
+            "902"
+        ],
+        "scenario_type": "Context",
+        "expected_intent": {
+            "target": "사람 간식"
+        }
+    },
+    {
+        "id": "TC_15",
+        "query": "강아지가 먹는 껌",
+        "candidates_hint": [
+            "강아지 껌",
+            "자일리톨",
+            "풍선껌"
+        ],
+        "ground_truth_ids_hint": [
+            "950"
+        ],
+        "scenario_type": "Context",
+        "expected_intent": {
+            "target": "강아지 껌"
+        }
+    },
+    {
+        "id": "TC_16",
+        "query": "옷에 핀 보풀 제거하는 기계",
+        "candidates_hint": [
+            "보풀 제거기",
+            "면도기",
+            "테이프"
+        ],
+        "ground_truth_ids_hint": [
+            "1005"
+        ],
+        "scenario_type": "Description",
+        "expected_intent": {
+            "target": "보풀 제거기"
+        }
+    },
+    {
+        "id": "TC_17",
+        "query": "그.. 창문에 붙이는 거.. 겨울에..",
+        "candidates_hint": [
+            "단열 시트",
+            "방풍 비닐",
+            "문풍지"
+        ],
+        "ground_truth_ids_hint": [
+            "301",
+            "302"
+        ],
+        "scenario_type": "Hesitation/Context",
+        "expected_intent": {
+            "target": "단열 용품"
+        }
+    },
+    {
+        "id": "TC_18",
+        "query": "유리 닦는 거",
+        "candidates_hint": [
+            "유리 세정제",
+            "걸레",
+            "와이퍼"
+        ],
+        "ground_truth_ids_hint": [
+            "1101",
+            "1102"
+        ],
+        "scenario_type": "Intent-based",
+        "expected_intent": {
+            "target": "청소용품"
+        }
+    },
+    {
+        "id": "TC_19",
+        "query": "신발 안에 까는 거",
+        "candidates_hint": [
+            "깔창",
+            "양말",
+            "발 냄새 제거제"
+        ],
+        "ground_truth_ids_hint": [
+            "1201"
+        ],
+        "scenario_type": "Description",
+        "expected_intent": {
+            "target": "깔창"
+        }
+    },
+    {
+        "id": "TC_20",
+        "query": "다이소 에어팟 프로",
+        "candidates_hint": [
+            "에어팟 케이스",
+            "이어폰",
+            "블루투스 스피커"
+        ],
+        "ground_truth_ids_hint": [],
+        "scenario_type": "Distractor",
+        "expected_intent": {
+            "target": null
+        }
+    },
+    {
+        "id": "TC_21",
+        "query": "무선 마우스 건전지",
+        "candidates_hint": [
+            "AA 건전지",
+            "AAA 건전지",
+            "마우스"
+        ],
+        "ground_truth_ids_hint": [
+            "10",
+            "12"
+        ],
+        "scenario_type": "Context",
+        "expected_intent": {
+            "target": "건전지"
+        }
+    },
+    {
+        "id": "TC_22",
+        "query": "화장실 냄새 날 때 뿌리는 거",
+        "candidates_hint": [
+            "방향제",
+            "변기 세정제",
+            "향수"
+        ],
+        "ground_truth_ids_hint": [
+            "1301"
+        ],
+        "scenario_type": "Description",
+        "expected_intent": {
+            "target": "방향제"
+        }
+    },
+    {
+        "id": "TC_23",
+        "query": "머리 묶는 고무줄",
+        "candidates_hint": [
+            "머리끈",
+            "노란 고무줄",
+            "헤어 밴드"
+        ],
+        "ground_truth_ids_hint": [
+            "1401"
+        ],
+        "scenario_type": "Description",
+        "expected_intent": {
+            "target": "머리끈"
+        }
+    },
+    {
+        "id": "TC_24",
+        "query": "서류 정리하는 파일",
+        "candidates_hint": [
+            "L홀더",
+            "클리어 파일",
+            "바인더"
+        ],
+        "ground_truth_ids_hint": [
+            "1501",
+            "1502"
+        ],
+        "scenario_type": "Synonym",
+        "expected_intent": {
+            "target": "문구류"
+        }
+    },
+    {
+        "id": "TC_25",
+        "query": "매직 블럭",
+        "candidates_hint": [
+            "매직 스펀지",
+            "수세미",
+            "매직"
+        ],
+        "ground_truth_ids_hint": [
+            "1601"
+        ],
+        "scenario_type": "Synonym",
+        "expected_intent": {
+            "target": "매직 스펀지"
+        }
+    },
+    {
+        "id": "TC_26",
+        "query": "텀블러 씻는 솔",
+        "candidates_hint": [
+            "병솔",
+            "수세미",
+            "칫솔"
+        ],
+        "ground_truth_ids_hint": [
+            "1701"
+        ],
+        "scenario_type": "Intent-based",
+        "expected_intent": {
+            "target": "병솔"
+        }
+    },
+    {
+        "id": "TC_27",
+        "query": "방충망 구멍 났을 때",
+        "candidates_hint": [
+            "방충망 보수 테이프",
+            "파리채",
+            "모기약"
+        ],
+        "ground_truth_ids_hint": [
+            "1801"
+        ],
+        "scenario_type": "Problem-Solution",
+        "expected_intent": {
+            "target": "보수 테이프"
+        }
+    },
+    {
+        "id": "TC_28",
+        "query": "의자 발에 끼우는 거",
+        "candidates_hint": [
+            "의자 발 커버",
+            "양말",
+            "바닥 보호 스티커"
+        ],
+        "ground_truth_ids_hint": [
+            "1901"
+        ],
+        "scenario_type": "Description",
+        "expected_intent": {
+            "target": "발 커버"
+        }
+    },
+    {
+        "id": "TC_29",
+        "query": "포스트잇",
+        "candidates_hint": [
+            "점착 메모지",
+            "메모지",
+            "풀"
+        ],
+        "ground_truth_ids_hint": [
+            "2001"
+        ],
+        "scenario_type": "Brand Name",
+        "expected_intent": {
+            "target": "점착 메모지"
+        }
+    },
+    {
+        "id": "TC_30",
+        "query": "다이소 명품 지갑",
+        "candidates_hint": [
+            "동전 지갑",
+            "장지갑",
+            "카드 지갑"
+        ],
+        "ground_truth_ids_hint": [],
+        "scenario_type": "Distractor",
+        "expected_intent": {
+            "target": null
+        }
+    },
+    {
+        "id": "TC_31",
+        "query": "케이블 타이",
+        "candidates_hint": [
+            "케이블 타이",
+            "전선 정리",
+            "고무줄"
+        ],
+        "ground_truth_ids_hint": [
+            "2101"
+        ],
+        "scenario_type": "Specific Product",
+        "expected_intent": {
+            "target": "케이블 타이"
+        }
+    },
+    {
+        "id": "TC_32",
+        "query": "비와서 우산",
+        "candidates_hint": [
+            "우산",
+            "우비",
+            "장화"
+        ],
+        "ground_truth_ids_hint": [
+            "2201"
+        ],
+        "scenario_type": "Context",
+        "expected_intent": {
+            "target": "우산"
+        }
+    },
+    {
+        "id": "TC_33",
+        "query": "빨래 널 때 쓰는 거 큰 거",
+        "candidates_hint": [
+            "빨래 건조대",
+            "빨래 집게",
+            "옷걸이"
+        ],
+        "ground_truth_ids_hint": [
+            "2301"
+        ],
+        "scenario_type": "Description+Size",
+        "expected_intent": {
+            "target": "빨래 건조대"
+        }
+    },
+    {
+        "id": "TC_34",
+        "query": "줄자",
+        "candidates_hint": [
+            "줄자",
+            "자",
+            "공구 세트"
+        ],
+        "ground_truth_ids_hint": [
+            "2401"
+        ],
+        "scenario_type": "Specific Product",
+        "expected_intent": {
+            "target": "줄자"
+        }
+    },
+    {
+        "id": "TC_35",
+        "query": "글루건 심",
+        "candidates_hint": [
+            "글루 스틱",
+            "글루건",
+            "본드"
+        ],
+        "ground_truth_ids_hint": [
+            "2501"
+        ],
+        "scenario_type": "Synonym",
+        "expected_intent": {
+            "target": "글루 스틱"
+        }
+    },
+    {
+        "id": "TC_36",
+        "query": "핸드폰 거치대",
+        "candidates_hint": [
+            "스마트폰 거치대",
+            "차량용 거치대",
+            "독서대"
+        ],
+        "ground_truth_ids_hint": [
+            "2601"
+        ],
+        "scenario_type": "Synonym",
+        "expected_intent": {
+            "target": "거치대"
+        }
+    },
+    {
+        "id": "TC_37",
+        "query": "캠핑 갈 때 쓰는 램프",
+        "candidates_hint": [
+            "캠핑 램프",
+            "손전등",
+            "무드등"
+        ],
+        "ground_truth_ids_hint": [
+            "2701"
+        ],
+        "scenario_type": "Context",
+        "expected_intent": {
+            "target": "램프"
+        }
+    },
+    {
+        "id": "TC_38",
+        "query": "다이소 상품권",
+        "candidates_hint": [
+            "봉투",
+            "카드",
+            "현금 봉투"
+        ],
+        "ground_truth_ids_hint": [],
+        "scenario_type": "Distractor",
+        "expected_intent": {
+            "target": null
+        }
+    },
+    {
+        "id": "TC_39",
+        "query": "욕실 슬리퍼",
+        "candidates_hint": [
+            "욕실화",
+            "거실화",
+            "삼선 슬리퍼"
+        ],
+        "ground_truth_ids_hint": [
+            "2801"
+        ],
+        "scenario_type": "Synonym",
+        "expected_intent": {
+            "target": "욕실화"
+        }
+    },
+    {
+        "id": "TC_40",
+        "query": "선물 포장지",
+        "candidates_hint": [
+            "포장지",
+            "쇼핑백",
+            "리본"
+        ],
+        "ground_truth_ids_hint": [
+            "2901"
+        ],
+        "scenario_type": "Intent-based",
+        "expected_intent": {
+            "target": "포장용품"
+        }
+    },
+    {
+        "id": "TC_41",
+        "query": "드라이버 세트",
+        "candidates_hint": [
+            "정밀 드라이버",
+            "양면 드라이버",
+            "공구함"
+        ],
+        "ground_truth_ids_hint": [
+            "3001"
+        ],
+        "scenario_type": "Specific Product",
+        "expected_intent": {
+            "target": "드라이버"
+        }
+    },
+    {
+        "id": "TC_42",
+        "query": "순간 접착제",
+        "candidates_hint": [
+            "강력 접착제",
+            "물풀",
+            "테이프"
+        ],
+        "ground_truth_ids_hint": [
+            "3101"
+        ],
+        "scenario_type": "Synonym",
+        "expected_intent": {
+            "target": "접착제"
+        }
+    },
+    {
+        "id": "TC_43",
+        "query": "돼지 저금통",
+        "candidates_hint": [
+            "저금통",
+            "동전 지갑",
+            "금고"
+        ],
+        "ground_truth_ids_hint": [
+            "3201"
+        ],
+        "scenario_type": "Specific Product",
+        "expected_intent": {
+            "target": "저금통"
+        }
+    },
+    {
+        "id": "TC_44",
+        "query": "샤워 타올",
+        "candidates_hint": [
+            "샤워 볼",
+            "때타올",
+            "수건"
+        ],
+        "ground_truth_ids_hint": [
+            "3301"
+        ],
+        "scenario_type": "Synonym",
+        "expected_intent": {
+            "target": "샤워 용품"
+        }
+    },
+    {
+        "id": "TC_45",
+        "query": "여행용 칫솔 세트",
+        "candidates_hint": [
+            "여행용 양치 세트",
+            "칫솔",
+            "치약"
+        ],
+        "ground_truth_ids_hint": [
+            "3401"
+        ],
+        "scenario_type": "Intent-based",
+        "expected_intent": {
+            "target": "양치 세트"
+        }
+    },
+    {
+        "id": "TC_46",
+        "query": "다이소 주식",
+        "candidates_hint": [
+            "장난감 돈",
+            "가계부",
+            "계산기"
+        ],
+        "ground_truth_ids_hint": [],
+        "scenario_type": "Distractor",
+        "expected_intent": {
+            "target": null
+        }
+    },
+    {
+        "id": "TC_47",
+        "query": "마스크",
+        "candidates_hint": [
+            "KF94 마스크",
+            "덴탈 마스크",
+            "패션 마스크"
+        ],
+        "ground_truth_ids_hint": [
+            "3501",
+            "3502"
+        ],
+        "scenario_type": "Specific Product",
+        "expected_intent": {
+            "target": "마스크"
+        }
+    },
+    {
+        "id": "TC_48",
+        "query": "화분",
+        "candidates_hint": [
+            "화분",
+            "배양토",
+            "조화"
+        ],
+        "ground_truth_ids_hint": [
+            "3601"
+        ],
+        "scenario_type": "Specific Product",
+        "expected_intent": {
+            "target": "화분"
+        }
+    },
+    {
+        "id": "TC_49",
+        "query": "네일 리무버",
+        "candidates_hint": [
+            "아세톤",
+            "화장솜",
+            "매니큐어"
+        ],
+        "ground_truth_ids_hint": [
+            "3701"
+        ],
+        "scenario_type": "Synonym",
+        "expected_intent": {
+            "target": "아세톤"
+        }
+    },
+    {
+        "id": "TC_50",
+        "query": "초파리 트랩",
+        "candidates_hint": [
+            "초파리 끈끈이",
+            "살충제",
+            "모기향"
+        ],
+        "ground_truth_ids_hint": [
+            "3801"
+        ],
+        "scenario_type": "Synonym",
+        "expected_intent": {
+            "target": "초파리 트랩"
+        }
+    },
+    {
+        "id": "TC_51",
+        "query": "Jongee Tape",
+        "candidates_hint": [
+            "마스킹 테이프",
+            "종이 테이프",
+            "박스 테이프"
+        ],
+        "ground_truth_ids_hint": [
+            "410"
+        ],
+        "scenario_type": "Typo/Phonetic",
+        "expected_intent": {
+            "target": "마스킹 테이프"
+        }
+    },
+    {
+        "id": "TC_52",
+        "query": "청소박사",
+        "candidates_hint": [
+            "매직 스펀지",
+            "수세미",
+            "청소포"
+        ],
+        "ground_truth_ids_hint": [
+            "1601",
+            "31"
+        ],
+        "scenario_type": "Slang",
+        "expected_intent": {
+            "target": "청소용품"
+        }
+    },
+    {
+        "id": "TC_53",
+        "query": "작은 건전지",
+        "candidates_hint": [
+            "AAA 건전지",
+            "AA 건전지",
+            "동전 건전지"
+        ],
+        "ground_truth_ids_hint": [
+            "12"
+        ],
+        "scenario_type": "Size/Spec",
+        "expected_intent": {
+            "target": "AAA 건전지"
+        }
+    },
+    {
+        "id": "TC_54",
+        "query": "비빔면 먹고 남은 음식물 쓰레기 버릴 봉투",
+        "candidates_hint": [
+            "음식물 쓰레기 봉투",
+            "지퍼백",
+            "위생백"
+        ],
+        "ground_truth_ids_hint": [
+            "501"
+        ],
+        "scenario_type": "Situation",
+        "expected_intent": {
+            "target": "음식물 쓰레기 봉투"
+        }
+    },
+    {
+        "id": "TC_55",
+        "query": "의자 끄는 소리 안 나게 하는 거",
+        "candidates_hint": [
+            "의자 발 커버",
+            "바닥 보호 매트",
+            "방음재"
+        ],
+        "ground_truth_ids_hint": [
+            "1901"
+        ],
+        "scenario_type": "Problem-Solution",
+        "expected_intent": {
+            "target": "의자 발 커버"
+        }
+    },
+    {
+        "id": "TC_56",
+        "query": "3M 장갑",
+        "candidates_hint": [
+            "니트릴 장갑",
+            "고무장갑",
+            "목장갑"
+        ],
+        "ground_truth_ids_hint": [],
+        "scenario_type": "Brand-like",
+        "expected_intent": {
+            "target": null
+        }
+    },
+    {
+        "id": "TC_57",
+        "query": "욕실 청소할 때 신는 거",
+        "candidates_hint": [
+            "욕실화",
+            "장화",
+            "단화"
+        ],
+        "ground_truth_ids_hint": [
+            "2801"
+        ],
+        "scenario_type": "Situation",
+        "expected_intent": {
+            "target": "욕실화"
+        }
+    },
+    {
+        "id": "TC_58",
+        "query": "여행 짐 쌀 때 액체 담는 거",
+        "candidates_hint": [
+            "리필 용기",
+            "지퍼백",
+            "여행용 파우치"
+        ],
+        "ground_truth_ids_hint": [
+            "201"
+        ],
+        "scenario_type": "Situation",
+        "expected_intent": {
+            "target": "리필 용기"
+        }
+    },
+    {
+        "id": "TC_59",
+        "query": "Mouse Batte..ry",
+        "candidates_hint": [
+            "AA 건전지",
+            "마우스",
+            "충전기"
+        ],
+        "ground_truth_ids_hint": [
+            "10"
+        ],
+        "scenario_type": "Broken English",
+        "expected_intent": {
+            "target": "건전지"
+        }
+    },
+    {
+        "id": "TC_60",
+        "query": "손톱 지우는 약",
+        "candidates_hint": [
+            "아세톤",
+            "매니큐어",
+            "핸드크림"
+        ],
+        "ground_truth_ids_hint": [
+            "3701"
+        ],
+        "scenario_type": "Function",
+        "expected_intent": {
+            "target": "아세톤"
+        }
+    },
+    {
+        "id": "TC_61",
+        "query": "다이소 아이패드",
+        "candidates_hint": [
+            "태블릿 거치대",
+            "보호필름",
+            "터치펜"
+        ],
+        "ground_truth_ids_hint": [],
+        "scenario_type": "Distractor",
+        "expected_intent": {
+            "target": null
+        }
+    }
+]

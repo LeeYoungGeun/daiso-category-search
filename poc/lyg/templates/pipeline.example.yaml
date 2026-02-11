@@ -1,0 +1,34 @@
+pipelines:
+  bm25_only:
+    pipeline_id: bm25_only
+    steps: [bm25]
+    params:
+      top_k_bm25: 50
+
+  dense_only:
+    pipeline_id: dense_only
+    steps: [dense]
+    params:
+      top_k_dense: 50
+
+  hybrid_rrf:
+    pipeline_id: hybrid_rrf
+    steps: [dense, bm25, fusion]
+    params:
+      top_k_dense: 50
+      top_k_bm25: 50
+      top_k_fused: 50
+      fusion:
+        method: rrf
+        rrf_k: 60
+
+  hybrid_weighted:
+    pipeline_id: hybrid_weighted
+    steps: [dense, bm25, fusion]
+    params:
+      top_k_dense: 50
+      top_k_bm25: 50
+      top_k_fused: 50
+      fusion:
+        method: weighted
+        alpha: 0.5

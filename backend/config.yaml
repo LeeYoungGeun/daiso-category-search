@@ -1,0 +1,49 @@
+# backend/config.yaml
+# STT Pipeline Configuration
+# PoC Phase 1: Batch processing with Whisper medium
+
+stt:
+  whisper:
+    model_size: "medium"  # large-v3 requires ~10GB VRAM, RTX 3050 4GB → medium
+    device: "cpu"
+    compute_type: "int8"
+    fallback_model: "small"  # If medium OOM
+    language: "ko"
+  
+  google:
+    credentials_path: "google_key.json"  # Path to Service Account JSON
+    language_code: "ko-KR"
+    
+quality_gate:
+  min_chars: 2
+  min_confidence: 0.6
+  nonsense_patterns:
+    - "(ㅋ|ㅎ){3,}"
+    - "(ㅇ){3,}"
+    - "[!?]{3,}"
+    - "^(아+|음+|어+|그+)$"
+
+policy_gate:
+  fixed_locations:
+    - keyword: "화장실"
+      target: "restroom"
+      response: "화장실은 매장 뒤쪽 왼편에 있습니다."
+    - keyword: "계산대"
+      target: "checkout"
+      response: "계산대는 매장 출구 쪽에 있습니다."
+    - keyword: "입구"
+      target: "entrance"
+      response: "입구는 정면입니다."
+    - keyword: "출구"
+      target: "exit"
+      response: "출구는 계산대 쪽입니다."
+  
+  unsupported_patterns:
+    - "배달"
+    - "교환"
+    - "환불"
+    - "영업시간"
+    - "반품"
+  
+  fallback_message: "이 서비스는 상품과 매장 내 위치 안내를 도와드리고 있어요. 찾고 계신 물건이나 장소를 말씀해 주세요!"
+  retry_message: "말씀을 잘 듣지 못했어요. 찾고 계신 상품을 다시 말씀해 주세요."

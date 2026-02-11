@@ -1,0 +1,20 @@
+Input Text                     | Intent     | Need Clarification   | Tail Question
+----------------------------------------------------------------------------------------------------
+Error in analyze_text: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+Error in generate_tail_question: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+다이소에서 파는 3000원짜리 수납장 있어?       | CHIT_CHAT  | True                 | 조금 더 구체적으로 말씀해 주실 수 있나요?
+Error in analyze_text: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+Error in generate_tail_question: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+파란색 볼펜 찾아줘                     | CHIT_CHAT  | True                 | 조금 더 구체적으로 말씀해 주실 수 있나요?
+Error in analyze_text: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+Error in generate_tail_question: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+이거 배송 언제 돼?                    | CHIT_CHAT  | True                 | 조금 더 구체적으로 말씀해 주실 수 있나요?
+Error in analyze_text: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+Error in generate_tail_question: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+안녕                             | CHIT_CHAT  | True                 | 조금 더 구체적으로 말씀해 주실 수 있나요?
+Error in analyze_text: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+Error in generate_tail_question: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+캠핑용품 뭐 있어?                     | CHIT_CHAT  | True                 | 조금 더 구체적으로 말씀해 주실 수 있나요?
+Error in analyze_text: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+Error in generate_tail_question: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+드릴                             | CHIT_CHAT  | True                 | 조금 더 구체적으로 말씀해 주실 수 있나요?

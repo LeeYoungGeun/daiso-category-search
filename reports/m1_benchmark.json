@@ -1,0 +1,79 @@
+[
+  {
+    "mode": "hybrid",
+    "n_cases": 88,
+    "metrics": {
+      "hit@1": 0.8409,
+      "hit@3": 0.9773,
+      "hit@5": 0.9886,
+      "hit@10": 1.0,
+      "mrr": 0.9081,
+      "ndcg@5": 0.9152,
+      "ndcg@10": 0.9275,
+      "avg_latency_ms": 374.8295,
+      "p95_latency_ms": 398
+    },
+    "failures": [
+      {
+        "case_id": "tc_4022",
+        "query": "마우스 패드 마우스패드 컴퓨터 데스크 게이밍 논슬립",
+        "expected": [
+          "mouse_pad_basic"
+        ]
+      }
+    ],
+    "total_time_s": 33.0,
+    "timestamp": "2026-02-10 16:37:10"
+  },
+  {
+    "mode": "bm25_only",
+    "n_cases": 88,
+    "metrics": {
+      "hit@1": 0.7955,
+      "hit@3": 0.9205,
+      "hit@5": 0.9773,
+      "hit@10": 1.0,
+      "mrr": 0.866,
+      "ndcg@5": 0.8781,
+      "ndcg@10": 0.8956,
+      "avg_latency_ms": 23.8636,
+      "p95_latency_ms": 32
+    },
+    "failures": [
+      {
+        "case_id": "tc_4022",
+        "query": "마우스 패드 마우스패드 컴퓨터 데스크 게이밍 논슬립",
+        "expected": [
+          "mouse_pad_basic"
+        ]
+      },
+      {
+        "case_id": "tc_4041",
+        "query": "풀 접착제 딱풀 고체풀 문구 사무용품 학용품",
+        "expected": [
+          "glue_stick_basic"
+        ]
+      }
+    ],
+    "total_time_s": 2.1,
+    "timestamp": "2026-02-10 16:37:12"
+  },
+  {
+    "mode": "dense_only",
+    "n_cases": 88,
+    "metrics": {
+      "hit@1": 0.8977,
+      "hit@3": 0.9545,
+      "hit@5": 1.0,
+      "hit@10": 1.0,
+      "mrr": 0.9331,
+      "ndcg@5": 0.9311,
+      "ndcg@10": 0.9368,
+      "avg_latency_ms": 351.6705,
+      "p95_latency_ms": 376
+    },
+    "failures": [],
+    "total_time_s": 31.0,
+    "timestamp": "2026-02-10 16:37:43"
+  }
+]
