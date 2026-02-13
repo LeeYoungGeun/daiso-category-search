@@ -48,35 +48,34 @@ policy_gate:
   fallback_message: "이 서비스는 상품과 매장 내 위치 안내를 도와드리고 있어요. 찾고 계신 물건이나 장소를 말씀해 주세요!"
   retry_message: "말씀을 잘 듣지 못했어요. 찾고 계신 상품을 다시 말씀해 주세요."
 
-# ── STT 고도화 설정 (poc/lsy/config.yaml에서 병합) ──────────────────────────
-# 전처리: AudioPreprocessor가 읽음
+# v2 고도화: 전처리 설정
 preprocessing:
   volume_normalize: true
   target_dBFS: -20
-  noise_reduction: false          # 기본 OFF, 노이즈 심한 환경에서만 true
+  noise_reduction: false  # 기본 false, 노이즈 심한 케이스에서 A/B 테스트
 
-# 후처리: TextPostprocessor가 읽음
+# v2 고도화: 후처리 설정
 postprocessing:
-  enabled: true
-  apply_to_google: true
-  apply_to_fallback: true
-  remove_fillers: true            # 추임새 제거 (음, 어, 그...)
-  normalize_units: true           # 단위 정규화 (미리→ml)
-  cleanup_whitespace: true
+  enabled: true                  # 전체 ON/OFF
+  apply_to_google: true          # Google Streaming 결과에도 후처리 적용
+  apply_to_fallback: true        # Whisper Fallback 결과에도 후처리 적용
+  remove_fillers: true           # 추임새/수사 제거 (음, 어, 그...)
+  normalize_units: true          # 단위/숫자 정규화 (미리→ml, 센치→cm)
+  cleanup_whitespace: true       # 공백/구두점 정리
 
-# Whisper Fallback: Google Streaming 실패 시 로컬 Whisper로 전환
-# poc/lsy/ws_stt.py의 WhisperFallbackManager가 읽음
+# Whisper Fallback 설정 (Google Streaming 실패 시)
 fallback:
   enabled: true
-  buffer_max_sec: 15              # Ring buffer 최대 유지 (초)
+  buffer_max_sec: 15             # Ring buffer 최대 유지 (초)
   whisper:
     model_size: "medium"
-    device: "cpu"                 # Lightsail: cpu, GPU 있으면 cuda
+    device: "cpu"
     compute_type: "int8"
     fallback_model: "small"
     language: "ko"
   preprocess:
     volume_normalize: true
     target_dBFS: -20
-    denoise: true
-  postprocess: true               # postprocessing 설정 따름
+    denoise: true                # stationary noise reduction
+  postprocess: true              # 후처리 적용 (postprocessing 설정 따름)
+

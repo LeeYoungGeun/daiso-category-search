@@ -1,0 +1,44 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.egg-info
+.venv
+venv
+.pytest_cache
+.mypy_cache
+
+# Node
+frontend/node_modules
+frontend/.next
+
+# IDE
+.vscode
+.idea
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+server_output.txt
+
+# Docker
+docker-compose*.yml
+
+# Data (mounted as volumes)
+backend/database/product_embeddings/
+
+# Env files (injected at runtime)
+.env.local
+.env.live
+
+# Docs / artifacts
+.gemini
+*.md

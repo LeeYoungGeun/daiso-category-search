@@ -1,0 +1,93 @@
+# docker-compose.data.yml — 서버 B (Search/Data) 전용
+# 사용법:
+#   서버 B (54.180.1.204) 에서 실행
+#   docker compose -f docker-compose.data.yml up -d
+#
+# 보안: 방화벽에서 서버 A (3.39.6.105)만 접근 허용 권장
+#   sudo ufw allow from 3.39.6.105 to any port 9200
+#   sudo ufw allow from 3.39.6.105 to any port 6333
+#   sudo ufw allow from 3.39.6.105 to any port 6379
+
+services:
+  # ── Elasticsearch (BM25 검색) ──────────────────────────────────
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    container_name: daiso-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - cluster.name=daiso-search
+      - bootstrap.memory_lock=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    ports:
+      - "9200:9200"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+        reservations:
+          memory: 512M
+
+  # ── Qdrant (Vector 검색) ───────────────────────────────────────
+  qdrant:
+    image: qdrant/qdrant:v1.9.7
+    container_name: daiso-qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -sf http://localhost:6333/healthz || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  # ── Redis (캐시/세션) ──────────────────────────────────────────
+  redis:
+    image: redis:7.2-alpine
+    container_name: daiso-redis
+    command: redis-server --maxmemory 50mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 100M
+
+volumes:
+  es_data:
+    driver: local
+  qdrant_data:
+    driver: local
+  redis_data:
+    driver: local

@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import sqlite3
 import os
 import re
 import sys
@@ -34,6 +35,7 @@ if _project_root not in sys.path:
 
 from backend.search.config import HybridSearchConfig
 from backend.search.embedding import build_embedding_adapter
+from backend.database.category_matcher import match_product_to_category
 
 
 # ─── Constants ────────────────────────────────────────────────────────────────
@@ -44,6 +46,7 @@ TEXT_COL = "text"
 CAT_COL = "category"
 
 DEFAULT_CATALOG = "poc/lyg/data/catalog.30cat.v3.tsv"
+DEFAULT_SQLITE_DB = os.path.join(os.path.dirname(__file__), "..", "database", "products.db")
 BATCH_SIZE = 50       # embedding batch size
 BULK_CHUNK = 200      # elastic bulk chunk size
 
@@ -76,6 +79,51 @@ def read_catalog(path: str) -> Tuple[List[Dict[str, str]], List[str]]:
         reader = csv.DictReader(f, delimiter="\t")
         rows = list(reader)
         return rows, list(reader.fieldnames or [])
+
+
+def read_from_sqlite(db_path: str = DEFAULT_SQLITE_DB) -> Tuple[List[Dict[str, str]], List[str]]:
+    """Read products from SQLite products.db and convert to catalog format.
+    
+    Maps products.db columns to the indexer's expected format:
+      id -> doc_id, name -> title + text, category_matcher -> category
+    """
+    db_path = os.path.abspath(db_path)
+    if not os.path.exists(db_path):
+        raise FileNotFoundError(f"SQLite DB not found: {db_path}")
+    
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM products ORDER BY rank")
+    products = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    
+    if not products:
+        raise ValueError(f"No products found in {db_path}")
+    
+    rows = []
+    for p in products:
+        name = p.get("name", "").strip()
+        if not name:
+            continue
+        
+        # Auto-assign category using category_matcher
+        major, middle = match_product_to_category(name)
+        category = f"{major}/{middle}" if middle else major
+        
+        rows.append({
+            ID_COL: str(p["id"]),
+            TITLE_COL: name,
+            TEXT_COL: name,  # products.db has no separate description, use name
+            CAT_COL: category,
+            # Extra fields for enriched payloads
+            "price": str(p.get("price", 0)),
+            "image_url": p.get("image_url", "") or "",
+        })
+    
+    headers = [ID_COL, TITLE_COL, TEXT_COL, CAT_COL, "price", "image_url"]
+    print(f"  📊 Loaded {len(rows)} products from SQLite: {db_path}")
+    return rows, headers
 
 
 # ─── Elasticsearch Operations ─────────────────────────────────────────────────
@@ -274,14 +322,16 @@ def index_catalog(
     config: Optional[HybridSearchConfig] = None,
     clean: bool = False,
     dry_run: bool = False,
+    source: str = "sqlite",
 ) -> Dict[str, Any]:
     """Index catalog into Elasticsearch + Qdrant.
 
     Args:
-        catalog_path: Path to catalog TSV file
+        catalog_path: Path to catalog TSV file (used when source='tsv')
         config: Search config (default: from env)
         clean: Delete existing index/collection before indexing
         dry_run: Only validate, don't actually index
+        source: Data source - 'sqlite' (products.db) or 'tsv' (catalog file)
 
     Returns:
         Summary dict with counts and timing
@@ -293,9 +343,13 @@ def index_catalog(
     print("M1 Catalog Indexer")
     print("=" * 60)
 
-    # ── Read catalog ──
-    print(f"\n📂 Reading catalog: {catalog_path}")
-    rows, headers = read_catalog(catalog_path)
+    # ── Read data ──
+    if source == "sqlite":
+        print(f"\n📂 Reading from SQLite: products.db")
+        rows, headers = read_from_sqlite()
+    else:
+        print(f"\n📂 Reading catalog: {catalog_path}")
+        rows, headers = read_catalog(catalog_path)
     for col in (ID_COL, TITLE_COL, TEXT_COL, CAT_COL):
         if col not in headers:
             raise ValueError(f"Catalog missing column '{col}'. Headers={headers}")
@@ -388,6 +442,8 @@ def index_catalog(
                 continue
 
             bm25_text = build_bm25_text(title, text, cat)
+            price = r.get("price", "0")
+            image_url = r.get("image_url", "")
 
             # Elastic doc
             elastic_buf.append({
@@ -396,6 +452,8 @@ def index_catalog(
                 "text": text,
                 "category": cat,
                 "bm25_text": bm25_text,
+                "price": price,
+                "image_url": image_url,
             })
 
             # Qdrant: UUID id, original doc_id in payload
@@ -408,6 +466,8 @@ def index_catalog(
                 "text": text,
                 "category": cat,
                 "bm25_text": bm25_text,
+                "price": price,
+                "image_url": image_url,
             })
 
         # Flush elastic in chunks
@@ -458,7 +518,9 @@ def index_catalog(
 
 def main():
     parser = argparse.ArgumentParser(description="M1 Catalog Indexer")
-    parser.add_argument("--catalog", default=DEFAULT_CATALOG, help="Path to catalog TSV")
+    parser.add_argument("--source", choices=["sqlite", "tsv"], default="sqlite",
+                        help="Data source: 'sqlite' (products.db, default) or 'tsv' (catalog file)")
+    parser.add_argument("--catalog", default=DEFAULT_CATALOG, help="Path to catalog TSV (when --source tsv)")
     parser.add_argument("--clean", action="store_true", help="Delete existing data before indexing")
     parser.add_argument("--dry-run", action="store_true", help="Validate only, don't index")
     args = parser.parse_args()
@@ -472,8 +534,10 @@ def main():
 
     index_catalog(
         catalog_path=args.catalog,
+        config=None,
         clean=args.clean,
         dry_run=args.dry_run,
+        source=args.source,
     )
 
 

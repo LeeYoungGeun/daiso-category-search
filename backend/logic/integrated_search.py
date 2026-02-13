@@ -24,6 +24,7 @@ if _project_root not in sys.path:
 
 from poc.kms.nlu import analyze_text, expand_search_keywords
 from backend.logic.reranker import rerank_candidates
+from backend.search.cache import cache_get, cache_set
 from backend.logic.ambiguity import (
     detect_ambiguity,
     calculate_category_spread,
@@ -162,19 +163,31 @@ class IntegratedSearchPipeline:
                 }
                 return result
 
-            # Step 2: Keyword Expansion
+            # Step 2: Keyword Expansion (with Redis cache)
             expand_start = time.time()
             search_keywords = []
+            expand_cache_hit = False
 
             # Primary keyword from NLU
             primary_keyword = nlu_result.slots.item or nlu_result.slots.query_rewrite or query
             search_keywords.append(primary_keyword)
 
-            # Expand keywords using Gemini
-            expanded_keywords, expand_usage = await expand_search_keywords(
-                primary_keyword,
-                return_usage=True,
-            )
+            # Try cache first for keyword expansion
+            cached_expansion = cache_get("expand", primary_keyword)
+            if cached_expansion is not None:
+                expanded_keywords = cached_expansion
+                expand_usage = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
+                expand_cache_hit = True
+                logger.info(f"Cache HIT: keyword expansion for '{primary_keyword}'")
+            else:
+                # Expand keywords using Gemini
+                expanded_keywords, expand_usage = await expand_search_keywords(
+                    primary_keyword,
+                    return_usage=True,
+                )
+                # Cache the expansion result
+                cache_set("expand", primary_keyword, expanded_keywords)
+
             search_keywords.extend(expanded_keywords[:3])  # Top 3 expansions
 
             # Remove duplicates while preserving order
@@ -186,13 +199,23 @@ class IntegratedSearchPipeline:
                 "primary": primary_keyword,
                 "expanded": search_keywords,
                 "token_usage": expand_usage,
+                "cache_hit": expand_cache_hit,
             }
 
-            # Step 3: Search — Hybrid (M1) or SQLite fallback
+            # Step 3: Search — Hybrid (M1) or SQLite fallback (with Redis cache)
             search_start = time.time()
+            search_cache_hit = False
 
-            if self._use_hybrid:
+            # Try cache first for search results
+            cached_search = cache_get("search", search_keywords)
+            if cached_search is not None:
+                candidates = cached_search
+                search_cache_hit = True
+                logger.info(f"Cache HIT: search results for {search_keywords}")
+            elif self._use_hybrid:
                 candidates = self._hybrid_search(search_keywords, result)
+                # Cache the search results
+                cache_set("search", search_keywords, candidates)
             else:
                 candidates = self._sqlite_search(search_keywords)
 
@@ -203,6 +226,7 @@ class IntegratedSearchPipeline:
                 "candidates_count": len(candidates),
                 "keywords_used": search_keywords,
                 "mode": self.search_mode,
+                "cache_hit": search_cache_hit,
             }
 
             # Step 4: M2 — Ambiguity Detection

@@ -1,5 +1,6 @@
-# Backend Dependencies (Python 3.10)
+# Backend Dependencies (Python 3.12)
 # Synced from search-roca (v0.8.1)
+redis>=5.0.0
 
 annotated-doc==0.0.4
 annotated-types==0.7.0

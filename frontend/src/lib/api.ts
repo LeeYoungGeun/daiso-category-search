@@ -114,9 +114,21 @@ export class STTWebSocketClient {
         // Wait for connection
         await new Promise<void>((resolve, reject) => {
             if (!this.ws) return reject(new Error("No WebSocket"));
-            this.ws.onopen = () => resolve();
+            const ws = this.ws;
+            ws.onopen = () => resolve();
+            // Also reject if the socket closes before opening (server not running)
+            const origOnClose = ws.onclose;
+            ws.onclose = (ev) => {
+                origOnClose?.call(ws, ev);
+                reject(new Error("WebSocket이 연결 전에 닫혔습니다. 백엔드 서버가 실행 중인지 확인하세요."));
+            };
             setTimeout(() => reject(new Error("WebSocket connection timeout")), 5000);
         });
+
+        // Guard: stop() may have been called while awaiting (e.g. React strict mode cleanup)
+        if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+            throw new Error("WebSocket이 이미 닫혔습니다.");
+        }
 
         // 2. Send start message
         this.ws.send(
@@ -238,7 +250,7 @@ export class STTWebSocketClient {
             this.source = null;
         }
         if (this.audioContext) {
-            this.audioContext.close().catch(() => {});
+            this.audioContext.close().catch(() => { });
             this.audioContext = null;
         }
         if (this.mediaStream) {

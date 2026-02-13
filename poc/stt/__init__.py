@@ -1,11 +1,27 @@
 """
-STT Module - Speech-to-Text Pipeline Components
+STT Module — Compatibility Redirect Wrapper
+
+This module redirects all imports to the canonical implementation
+in poc/lsy/stt/. Do NOT add new code here; edit poc/lsy/stt/ instead.
+
+Usage (unchanged from before):
+    from poc.stt import get_adapter, WhisperAdapter, QualityGate, ...
+    # These now resolve to poc.lsy.stt internally.
 """
 
-from .adapters import BaseAdapter, WhisperAdapter, GoogleAdapter, get_adapter
-from .quality_gate import QualityGate
-from .policy_gate import PolicyGate
-from .audio_converter import AudioConverter, normalize_audio
+# ── Re-export everything from the canonical poc.lsy.stt module ───────────────
+from poc.lsy.stt import (  # noqa: F401
+    BaseAdapter,
+    WhisperAdapter,
+    GoogleAdapter,
+    get_adapter,
+    QualityGate,
+    PolicyGate,
+    AudioConverter,
+    normalize_audio,
+    TextPostprocessor,
+    AudioPreprocessor,
+)
 
 __all__ = [
     "BaseAdapter",
@@ -16,4 +32,6 @@ __all__ = [
     "PolicyGate",
     "AudioConverter",
     "normalize_audio",
+    "TextPostprocessor",
+    "AudioPreprocessor",
 ]

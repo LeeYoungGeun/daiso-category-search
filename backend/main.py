@@ -5,6 +5,7 @@ Integrated Pipeline: STT → NLU → Search → Rerank → Location
 """
 
 import yaml
+import os
 from pathlib import Path
 from fastapi import FastAPI, File, UploadFile, HTTPException, Body, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
@@ -27,6 +28,7 @@ from poc.stt.types import (
     ProviderResult, ComparisonPipelineResult
 )
 from backend.logic.integrated_search import get_pipeline
+from backend.search.cache import cache_health, cache_get, cache_set
 
 # Audio converter for normalizing audio to WAV/LINEAR16/16kHz/mono
 audio_converter = AudioConverter(output_dir="outputs/normalized")
@@ -72,10 +74,14 @@ app = FastAPI(
     version="2.0.0-integrated"
 )
 
-# CORS for Next.js frontend
+# CORS for frontend (local + production)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Next.js default port
+    allow_origins=[
+        "http://localhost:3000",      # Local dev
+        "http://frontend:3000",       # Docker internal
+        os.getenv("CORS_ORIGIN", ""), # Custom domain
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -143,12 +149,39 @@ def root():
 
 @app.get("/health")
 def health_check():
+    redis_status = cache_health()
     return {
         "status": "healthy",
         "whisper_model": whisper_adapter.model_size,
         "google_ready": google_adapter.client is not None,
-        "search_pipeline": "ready"
+        "search_pipeline": "ready",
+        "redis_cache": redis_status,
     }
+
+
+@app.delete("/cache")
+def clear_cache():
+    """Clear all Redis cache entries (daiso:* keys)"""
+    try:
+        from backend.search.cache import _get_redis
+        client = _get_redis()
+        if client is None:
+            return {"status": "unavailable", "message": "Redis not connected"}
+
+        # Delete all daiso:* keys
+        cursor = 0
+        deleted = 0
+        while True:
+            cursor, keys = client.scan(cursor, match="daiso:*", count=100)
+            if keys:
+                client.delete(*keys)
+                deleted += len(keys)
+            if cursor == 0:
+                break
+
+        return {"status": "ok", "deleted_keys": deleted}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 
 
 @app.post("/v1/search", response_model=SearchResponse)

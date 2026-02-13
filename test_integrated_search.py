@@ -73,6 +73,7 @@ async def test_search():
             
             # Timing
             timing = result['timing_ms']
+            metadata = result.get('metadata', {})
             print(f"\n[TIME] Performance:")
             print(f"  - NLU: {timing.get('nlu', 0)}ms")
             print(f"  - Expand: {timing.get('expand', 0)}ms")
@@ -80,6 +81,15 @@ async def test_search():
             print(f"  - Rerank: {timing.get('rerank', 0)}ms")
             print(f"  - Location: {timing.get('location', 0)}ms")
             print(f"  - Total: {timing.get('total', 0)}ms")
+
+            # Cache info
+            kw_meta = metadata.get('keywords', {})
+            search_meta = metadata.get('search', {})
+            expand_hit = kw_meta.get('cache_hit', False)
+            search_hit = search_meta.get('cache_hit', False)
+            print(f"\n[CACHE] Redis:")
+            print(f"  - Keyword expansion: {'✅ HIT' if expand_hit else '❌ MISS'}")
+            print(f"  - Search results:    {'✅ HIT' if search_hit else '❌ MISS'}")
             
         except Exception as e:
             print(f"[ERROR] {e}")

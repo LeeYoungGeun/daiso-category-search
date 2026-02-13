@@ -3,7 +3,20 @@ __pycache__/
 *.py[cod]
 *$py.class
 venv/
+
+# Environment (API keys 포함 — 절대 커밋 금지)
 .env
+.env.live
+.env.local
+.env.production
+
+# Credentials
+backend/daisoproject-sst.json
+infra/certs/
+
+# Data (large binary)
+*.db
+server_output.txt
 
 # Node.js
 node_modules/
