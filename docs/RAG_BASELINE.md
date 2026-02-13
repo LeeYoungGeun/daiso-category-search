@@ -1,3 +1,10 @@
+# [ARCHIVED] RAG 대규모 Baseline 리포트 (문장형 입력 테스트)
+
+> [!WARNING]
+> **이 문서는 2026-01-19에 작성된 과거 PoC 실험 기록입니다.**
+> 현재의 하이브리드 검색 및 키워드 확장 파이프라인이 적용되기 전의 Baseline 결과이므로, 현재 시스템의 성능과는 큰 차이가 있습니다.
+> 최신 정보는 [INTEGRATION_SUMMARY.md](file:///c:/Users/301/dev/daiso-category-search/INTEGRATION_SUMMARY.md)를 참조하십시오.
+
 # **RAG 대규모 Baseline 리포트 (문장형 입력 테스트)**
 
 > **실험 일자**: 2026-01-19

@@ -1,3 +1,10 @@
+# [ARCHIVED] 다이소 상품 위치 안내 RAG 기반 AI 검색 서비스 — 아키텍처 및 통합 계획
+
+> [!CAUTION]
+> **이 문서는 Node.js 전환을 전제로 작성된 과거 아키텍처 계획서입니다.**
+> 실제 프로젝트는 **Python 3.12 (FastAPI) 기반**으로 완성되었으며, 이 문서의 'To-Be' 계획 중 대부분은 Python 환경에서 별도로 통합되었습니다.
+> 현재의 실제 구조는 [CLAUDE.md](file:///c:/Users/301/dev/daiso-category-search/CLAUDE.md) 및 [README.md](file:///c:/Users/301/dev/daiso-category-search/README.md)를 보십시오.
+
 # 다이소 상품 위치 안내 RAG 기반 AI 검색 서비스 — 아키텍처 및 통합 계획
 
 > **작성일**: 2026-02-10  

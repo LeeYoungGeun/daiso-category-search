@@ -1,3 +1,9 @@
+# [ARCHIVED] RAG Robustness PoC 리포트 (키워드 최적화)
+
+> [!WARNING]
+> **이 문서는 2026-01-19에 작성된 원본 PoC 실험 기록입니다.**
+> 이 보고서의 제언 사항들은 이미 [README.md](file:///c:/Users/301/dev/daiso-category-search/README.md) 및 [INTEGRATION_SUMMARY.md](file:///c:/Users/301/dev/daiso-category-search/INTEGRATION_SUMMARY.md)에 반영되어 시스템화되었습니다.
+
 # **RAG Robustness PoC 리포트 (키워드 최적화)**
 
 > **실험 일자**: 2026-01-19 (진행 중)

@@ -1,3 +1,8 @@
+# [ARCHIVED] PoC 검증 리포트: RAG 대규모 Baseline (문장형 쿼리)
+
+> [!NOTE]
+> **이 문서는 2026-01-20에 작성된 과거 보고서입니다.**
+
 # **PoC (Proof of Concept) 검증 리포트: RAG 대규모 Baseline (문장형 쿼리)**
 
 > **문서 목적**: 앞서 최적화된 **Step 4~6(검색/리랭킹/필터)** 파이프라인이 **"자연어 문장(Raw Sentence)"** 입력 환경에서도 유효한지 검증 (Integration Test).

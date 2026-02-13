@@ -1,3 +1,8 @@
+# [ARCHIVED] PoC 검증 리포트: RAG 견고성 확보
+
+> [!NOTE]
+> **이 문서는 2026-01-20에 작성된 과거 보고서입니다.**
+
 # **PoC (Proof of Concept) 검증 리포트: RAG 견고성 확보**
 
 > **문서 목적**: "정제된 키워드(Structured Query)"를 입력했을 때, 검색 실패가 얼마나 개선되는지(Robustness) 검증

@@ -1,3 +1,8 @@
+# [REFERENCE] NLU Failure Case Classification
+
+> [!NOTE]
+> **이 문서는 NLU 성능 평가를 위한 실패 사례 분류 기준입니다.**
+
 # NLU Failure Case Classification
 
 This document defines types of failures to look for when evaluating the NLU system.
