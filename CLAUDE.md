@@ -17,7 +17,7 @@
 | **NLU** | `poc/kms/` | Gemini 2.0 Flash 기반 의도분석, 키워드 추출/확장 |
 | **Search** | `backend/search/` | `hybrid.py` (ES+Qdrant), `cache.py` (Redis), `indexer.py` (색인) |
 | **Rerank** | `backend/ml/rerank_service.py` | `mock`/`simulated`/`local`/`vendor` 모드 지원 리랭커 |
-| **STT** | `poc/stt/` | Whisper + Google Cloud STT 어댑터 및 Quality Gate |
+| **STT** | `poc/stt/` | Google Cloud STT (Primary) + Whisper base (Fallback) 어댑터 및 Quality Gate |
 | **Logic** | `backend/logic/` | `ambiguity.py` (애매함 판정), `reranker.py` (LLM 리랭크 로직) |
 | **Frontend** | `frontend/` | Next.js 14 기반 키오스크 UI |
 | **Database** | `products.db` | 단일 데이터 소스 (SQLite) -> ES/Qdrant 색인 원천 |
@@ -27,7 +27,7 @@
 - **Backend**: Python 3.12, FastAPI, LangGraph, Pydantic v2
 - **Frontend**: Next.js 14, Tailwind CSS, Lucide React
 - **LLM**: Gemini 1.5/2.0 Flash (의도분석, 키워드, 리랭킹)
-- **STT**: Google Cloud Speech-to-Text v1 (Streaming), Whisper
+- **STT**: Google Cloud Speech-to-Text v1 (Streaming, Primary), Whisper base (Fallback)
 - **Search**: Elasticsearch 8.x (BM25), Qdrant 1.9.x (Vector), Redis 7.x (Cache)
 - **Cache**: Redis 기반 키워드/검색결과 캐싱 (TTL 5분, Graceful Degradation)
 

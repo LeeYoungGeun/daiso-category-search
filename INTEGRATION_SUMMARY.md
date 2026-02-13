@@ -17,7 +17,7 @@
 ```
 사용자 쿼리 (Voice/Text)
     ↓
-[STT] Google/Whisper (Streaming 지원)
+[STT] Google Cloud STT (Primary) / Whisper base (Fallback)
     ↓
 [NLU] 의도분석 + 키워드 추출 (Gemini 2.0 Flash)
     ↓

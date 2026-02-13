@@ -72,6 +72,7 @@ daiso-category-search/
 │   └── src/lib/api.ts           # API 클라이언트 (REST + WS)
 │
 ├── infra/
+│   ├── docker-compose.prod.yml  # 단일 서버 배포 (Lightsail 2GB 최적화)
 │   ├── docker-compose.app.yml   # 서버 A (API+FE)
 │   ├── docker-compose.data.yml  # 서버 B (ES+Qdrant+Redis)
 │   ├── nginx-host.conf          # Nginx 호스트 설정
@@ -169,7 +170,7 @@ daiso-category-search/
 | **리랭킹** | Gemini LLM 기반 리랭킹 | `backend/logic/reranker.py` |
 | **ML Rerank** | 4-mode 리랭킹 서비스 | `backend/ml/rerank_service.py` |
 | **에이전트** | LangGraph 순환 워크플로우 | `backend/logic/agent_graph.py` |
-| **STT** | Whisper + Google Cloud STT | `poc/stt/` |
+| **STT** | Google Cloud STT (Primary) + Whisper base (Fallback) | `poc/stt/` |
 | **상품 DB** | 크롤링 + SQLite 관리 | `backend/database/` |
 | **Redis 캐시** | 키워드 확장 + 검색 결과 캐시 (TTL 5분) | `backend/search/cache.py` |
 
