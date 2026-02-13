@@ -1,13 +1,13 @@
 # backend/config.yaml
 # STT Pipeline Configuration
-# PoC Phase 1: Batch processing with Whisper medium
+# Lightsail 2GB RAM 최적화: Whisper base (medium → base)
 
 stt:
   whisper:
-    model_size: "medium"  # large-v3 requires ~10GB VRAM, RTX 3050 4GB → medium
+    model_size: "base"  # Lightsail 2GB RAM 최적화: medium(~1.5GB) → base(~150MB)
     device: "cpu"
     compute_type: "int8"
-    fallback_model: "small"  # If medium OOM
+    fallback_model: "tiny"  # base OOM 시 tiny(~75MB)로 fallback
     language: "ko"
   
   google:
@@ -68,10 +68,10 @@ fallback:
   enabled: true
   buffer_max_sec: 15             # Ring buffer 최대 유지 (초)
   whisper:
-    model_size: "medium"
+    model_size: "base"           # Lightsail 2GB RAM 최적화: medium → base (~150MB)
     device: "cpu"
     compute_type: "int8"
-    fallback_model: "small"
+    fallback_model: "tiny"       # base OOM 시 tiny(~75MB)로 fallback
     language: "ko"
   preprocess:
     volume_normalize: true

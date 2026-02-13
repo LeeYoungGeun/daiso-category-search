@@ -99,7 +99,7 @@ daiso-category-search/
     │
     ▼
 ┌──────────────────────────────────┐
-│  Step 1. STT 변환                │  Whisper(로컬) / Google Cloud STT
+│  Step 1. STT 변환                │  Google Cloud STT(Primary) / Whisper base(Fallback)
 │  음성 → 텍스트                   │  WebSocket 실시간 스트리밍 지원
 └──────────┬───────────────────────┘
            ▼

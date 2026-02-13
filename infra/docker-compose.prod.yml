@@ -70,7 +70,7 @@ services:
       - discovery.type=single-node
       - xpack.security.enabled=false
       - xpack.security.http.ssl.enabled=false
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - ES_JAVA_OPTS=-Xms256m -Xmx256m
       - cluster.name=daiso-search
     volumes:
       - es_data:/usr/share/elasticsearch/data

@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.1.2] - 2026-02-13
+
+### Changed (Lightsail 2GB RAM 최적화)
+
+- **Whisper 모델 하향** (`backend/config.yaml`):
+  - `stt.whisper.model_size`: `medium` → `base` (~1.5GB → ~150MB 메모리 절감)
+  - `stt.whisper.fallback_model`: `small` → `tiny` (~500MB → ~75MB)
+  - `fallback.whisper.model_size`: `medium` → `base`
+  - `fallback.whisper.fallback_model`: `small` → `tiny`
+- **Elasticsearch 힙 축소** (`infra/docker-compose.prod.yml`):
+  - `ES_JAVA_OPTS`: `-Xms512m -Xmx512m` → `-Xms256m -Xmx256m` (256MB 절감)
+- **메모리 배분 (Lightsail 2GB 기준)**:
+  - ES 256MB + Qdrant ~200MB + Redis 50MB + API 512MB + Frontend 200MB + Whisper base ~150MB ≈ **1.4GB** (안정 운영 가능)
+
+### Notes
+
+- 프론트엔드 STT는 이미 Google Cloud STT (WebSocket Streaming)가 Primary — 변경 불필요
+- Whisper는 Google STT 실패 시 Fallback 전용으로만 사용
+- `docker-compose.data.yml` (서버 B)의 ES 설정은 변경하지 않음 (별도 서버, 충분한 메모리)
+
 ## [2.1.1] - 2026-02-11
 
 ### Added (ML Rerank — simulated/local modes, vendor sampling)
