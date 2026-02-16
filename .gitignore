@@ -1,36 +1,91 @@
-﻿# Python
+﻿########################################
+# Python
+########################################
 __pycache__/
 *.py[cod]
 *$py.class
+.venv/
 venv/
+.envrc
+pip-wheel-metadata/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+coverage.xml
+htmlcov/
+*.egg-info/
+dist/
+build/
 
-# Environment (API keys 포함 — 절대 커밋 금지)
+########################################
+# Environment / Secrets (절대 커밋 금지)
+########################################
 .env
-.env.live
-.env.local
-.env.production
+.env.*
+!.env.example
 
-# Credentials
+# Google STT / Credentials (로컬/서버에만)
+secrets/
 backend/daisoproject-sst.json
+**/*service-account*.json
+**/*credentials*.json
+**/*key*.json
+
+########################################
+# Certificates / SSL
+########################################
 infra/certs/
+infra/certbot/
+certs/
+*.pem
+*.crt
+*.key
 
-# Data (large binary)
+########################################
+# Data / DB / Outputs
+########################################
 *.db
+*.sqlite
+*.sqlite3
+backend/database/
 server_output.txt
+outputs/
+tmp/
+*.log
 
-# Node.js
+########################################
+# Node / Frontend
+########################################
 node_modules/
-npm-debug.log
-yarn-error.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 .next/
+out/
 frontend/node_modules/
 frontend/.next/
 frontend/.env.local
 
-# IDE
+########################################
+# IDE / OS
+########################################
 .idea/
 .vscode/
 *.swp
+*.swo
+.DS_Store
+Thumbs.db
 
-# Custom
-poc/bjy/old/
+########################################
+# Docker / Compose local overrides
+########################################
+docker-compose.override.yml
+
+########################################
+# Custom: 백업/임시파일 (vim/수정본 등)
+########################################
+*.bak
+*.backup
+*.orig
+*~

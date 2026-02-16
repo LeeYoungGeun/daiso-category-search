@@ -17,6 +17,11 @@ if sys.platform == 'win32':
 
 sys.path.append(str(Path(__file__).parent))
 
+# [PATCH] 테스트에서 외부 호출/하이브리드 의존성 제거
+os.environ.setdefault("SAFE_MODE", "1")
+os.environ.setdefault("DISABLE_HYBRID", "1")
+
+
 # Mock Hybrid Search to force fallback or just ensure it doesn't hang
 # We also need to mock NLU if Gemini is failing/hanging
 # But NLU logs showed it was working earlier (just 404 on specific model).
@@ -29,6 +34,8 @@ async def run_fallback_test():
     # We can do this by patching _try_init_hybrid_search to return None
     
     from backend.logic import integrated_search
+
+# [PATCH] 테스트에서 외부 호출/하이브리드 의존성 제거
     
     # Mock the hybrid init to return None (forcing SQLite fallback)
     with patch('backend.logic.integrated_search._try_init_hybrid_search', return_value=None):

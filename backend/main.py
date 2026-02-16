@@ -4,21 +4,28 @@ FastAPI Server for Daiso Category Search
 Integrated Pipeline: STT → NLU → Search → Rerank → Location
 """
 
-import yaml
 import os
-from pathlib import Path
-from fastapi import FastAPI, File, UploadFile, HTTPException, Body, WebSocket
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
-from typing import Optional, List, Dict, Any
+import sys
 import shutil
 import time
 import uuid
+from pathlib import Path
+from typing import Optional, List, Dict, Any
 
-import sys
+import yaml
+from fastapi import FastAPI, File, UploadFile, HTTPException, WebSocket
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, Field
+
+# -------------------------------------------------------------------
+# sys.path
+# -------------------------------------------------------------------
 sys.path.append(str(Path(__file__).parent))
 sys.path.append(str(Path(__file__).parent.parent))
 
+# -------------------------------------------------------------------
+# Imports (project)
+# -------------------------------------------------------------------
 from poc.stt.adapters import get_adapter, WhisperAdapter, GoogleAdapter
 from poc.stt.quality_gate import QualityGate
 from poc.stt.policy_gate import PolicyGate
@@ -27,19 +34,28 @@ from poc.stt.types import (
     PipelineResult, STTResult, QualityGateResult, PolicyIntent,
     ProviderResult, ComparisonPipelineResult
 )
-from backend.logic.integrated_search import get_pipeline
-from backend.search.cache import cache_health, cache_get, cache_set
 
+from backend.logic.integrated_search import get_pipeline
+from backend.search.cache import cache_health
+
+# Import WebSocket handler
+from backend.ws_stt import handle_streaming_stt
+
+# -------------------------------------------------------------------
 # Audio converter for normalizing audio to WAV/LINEAR16/16kHz/mono
+# -------------------------------------------------------------------
 audio_converter = AudioConverter(output_dir="outputs/normalized")
 
-
+# -------------------------------------------------------------------
 # Load configuration
+# -------------------------------------------------------------------
 config_path = Path(__file__).parent / "config.yaml"
 with open(config_path, "r", encoding="utf-8") as f:
     config = yaml.safe_load(f)
 
+# -------------------------------------------------------------------
 # Initialize components
+# -------------------------------------------------------------------
 print("🔄 Initializing STT adapters...")
 
 whisper_adapter: WhisperAdapter = get_adapter(  # type: ignore[assignment]
@@ -47,14 +63,11 @@ whisper_adapter: WhisperAdapter = get_adapter(  # type: ignore[assignment]
     **config["stt"]["whisper"]
 )
 
-# Initialize Google adapter
 google_config = config["stt"].get("google", {})
 google_config["credentials_path"] = "backend/daisoproject-sst.json"
 google_adapter: GoogleAdapter = get_adapter("google", **google_config)  # type: ignore[assignment]
 
-quality_gate = QualityGate(
-    **config["quality_gate"]
-)
+quality_gate = QualityGate(**config["quality_gate"])
 
 policy_gate = PolicyGate(
     fixed_locations=config["policy_gate"]["fixed_locations"],
@@ -63,57 +76,74 @@ policy_gate = PolicyGate(
 
 print("✅ All adapters initialized")
 
-# Initialize integrated search pipeline
 search_pipeline = get_pipeline()
 print("✅ Integrated search pipeline initialized")
 
+# -------------------------------------------------------------------
 # FastAPI app
+# -------------------------------------------------------------------
 app = FastAPI(
     title="Daiso Category Search API",
     description="Integrated AI Search: STT → NLU → Search → Rerank → Location",
     version="2.0.0-integrated"
 )
 
-# CORS for frontend (local + production)
+# -------------------------------------------------------------------
+# CORS
+# - allow_credentials=True 이므로 allow_origins에 "*" 들어가면 안 됨
+# - CORS_ORIGIN 환경변수는 콤마로 여러 개 받을 수 있게
+# -------------------------------------------------------------------
+cors_raw = os.getenv("CORS_ORIGIN", "").strip()
+
+cors_extra: List[str] = []
+if cors_raw:
+    # 콤마 분리 지원
+    tmp = [o.strip() for o in cors_raw.split(",") if o.strip()]
+    # "*"는 credentials=True에서 금지이므로 제거
+    tmp = [o for o in tmp if o != "*"]
+    cors_extra = tmp
+
+allow_origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://frontend:3000",         # Docker internal
+    *cors_extra,                    # e.g. http://3.39.6.105:3000
+]
+
+# 중복 제거(순서 유지)
+allow_origins = list(dict.fromkeys(allow_origins))
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",      # Local dev
-        "http://frontend:3000",       # Docker internal
-        os.getenv("CORS_ORIGIN", ""), # Custom domain
-    ],
+    allow_origins=allow_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Import WebSocket handler
-from backend.ws_stt import handle_streaming_stt
+print(f"✅ CORS allow_origins={allow_origins}")
 
+# -------------------------------------------------------------------
+# WebSocket endpoint
+# -------------------------------------------------------------------
 @app.websocket("/ws/stt")
 async def websocket_stt_endpoint(websocket: WebSocket):
     """WebSocket endpoint for real-time streaming STT"""
-    # Accept the connection first (bypass origin check for dev)
     await handle_streaming_stt(websocket)
-
 
 # ============================================================================
 # Request/Response Models for /v1/search
 # ============================================================================
-
 class SearchRequest(BaseModel):
-    """Request model for /v1/search endpoint"""
     store_id: str = Field(default="store_001", description="Store identifier")
     input_type: str = Field(default="text", description="Input type: text or voice")
     query: str = Field(..., description="User query text")
     session_id: Optional[str] = Field(default=None, description="Session ID for context")
     history: Optional[List[Dict[str, str]]] = Field(default=None, description="Conversation history")
-    # M2: Clarification tracking
     clarification_count: int = Field(default=0, description="Number of previous clarification attempts")
 
 
 class SearchResponse(BaseModel):
-    """Response model for /v1/search endpoint"""
     request_id: str
     query: str
     is_in_scope: bool
@@ -121,7 +151,6 @@ class SearchResponse(BaseModel):
     top3: List[Dict[str, Any]] = []
     top1_handover: Optional[Dict[str, Any]] = None
     message: Optional[str] = None
-    # M2: Clarification fields
     needs_clarification: bool = False
     clarification_question: Optional[str] = None
     clarification_options: List[str] = []
@@ -131,11 +160,9 @@ class SearchResponse(BaseModel):
     metadata: Dict[str, Any] = {}
     error: Optional[str] = None
 
-
 # ============================================================================
 # API Endpoints
 # ============================================================================
-
 @app.get("/")
 def root():
     return {
@@ -168,7 +195,6 @@ def clear_cache():
         if client is None:
             return {"status": "unavailable", "message": "Redis not connected"}
 
-        # Delete all daiso:* keys
         cursor = 0
         deleted = 0
         while True:
@@ -186,25 +212,7 @@ def clear_cache():
 
 @app.post("/v1/search", response_model=SearchResponse)
 async def search_endpoint(request: SearchRequest):
-    """
-    Integrated search endpoint
-    
-    Pipeline: NLU → Keyword Expansion → Search → Rerank → Location
-    
-    Request:
-        - store_id: Store identifier
-        - input_type: "text" or "voice"
-        - query: User query text
-        - session_id: Optional session ID for context
-        - history: Optional conversation history
-    
-    Response:
-        - request_id: Unique request identifier
-        - is_in_scope: Whether query is in scope
-        - top3: Top 3 product results
-        - top1_handover: QR code data for top result
-        - timing_ms: Performance metrics
-    """
+    """Integrated search endpoint"""
     try:
         result = await search_pipeline.search(
             query=request.query,
@@ -213,22 +221,15 @@ async def search_endpoint(request: SearchRequest):
             history=request.history or [],
             clarification_count=request.clarification_count,
         )
-        
         return SearchResponse(**result)
-        
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Search failed: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
 
 
 def run_single_provider(audio_path: str, provider: str, attempt: int = 1):
-    """Run STT pipeline for a single provider"""
     adapter = whisper_adapter if provider == "whisper" else google_adapter
     model = config["stt"]["whisper"]["model_size"] if provider == "whisper" else "default"
-    
-    # Convert audio to WAV/LINEAR16/16kHz/mono for STT
+
     try:
         conversion_result = audio_converter.normalize(audio_path)
         normalized_path = conversion_result["normalized_path"]
@@ -236,18 +237,14 @@ def run_single_provider(audio_path: str, provider: str, attempt: int = 1):
     except Exception as e:
         print(f"⚠️ Audio conversion failed, using original: {e}")
         normalized_path = audio_path
-    
-    # STT (use normalized path)
+
     stt_result = adapter.transcribe(normalized_path)
-    
-    # Quality Gate
     quality_result = quality_gate.evaluate(stt_result, attempt)
-    
-    # Policy Gate (only if OK)
+
     policy_intent = None
     if quality_result.status == "OK" and stt_result.text_raw:
         policy_intent = policy_gate.classify(stt_result.text_raw)
-    
+
     return ProviderResult(
         provider=provider,
         model=model,
@@ -258,7 +255,6 @@ def run_single_provider(audio_path: str, provider: str, attempt: int = 1):
 
 
 def generate_final_response(provider_result: ProviderResult) -> str:
-    """Generate final response based on provider result"""
     if provider_result.quality_gate.status == "OK":
         if provider_result.policy_intent:
             if provider_result.policy_intent.intent_type == "FIXED_LOCATION":
@@ -267,57 +263,44 @@ def generate_final_response(provider_result: ProviderResult) -> str:
                         return loc["response"]
             elif provider_result.policy_intent.intent_type == "UNSUPPORTED":
                 return config["policy_gate"]["fallback_message"]
-            else:  # PRODUCT_SEARCH
+            else:
                 return f"[PRODUCT_SEARCH] '{provider_result.stt.text_raw}' 검색 예정"
     elif provider_result.quality_gate.status == "RETRY":
         return config["policy_gate"]["retry_message"]
-    
+
     return "죄송합니다. 음성을 인식할 수 없었습니다."
 
 
 @app.post("/stt/compare", response_model=ComparisonPipelineResult)
-async def compare_audio(
-    audio: UploadFile = File(...),
-    attempt: int = 1
-):
-    """
-    Process audio through both Whisper and Google STT for comparison
-    
-    Returns results from both providers for performance comparison
-    """
+async def compare_audio(audio: UploadFile = File(...), attempt: int = 1):
     start_time = time.time()
     request_id = str(uuid.uuid4())[:8]
-    
-    # Save uploaded file
+
     Path("outputs").mkdir(exist_ok=True)
-    
-    # Use original filename if available, otherwise generate
+
     original_filename = audio.filename or f"recording_{request_id}.wav"
     temp_audio_path = f"outputs/temp_{request_id}_{original_filename}"
-    
+
     print(f"📁 Saving file: {temp_audio_path}")
-    
+
     try:
         with open(temp_audio_path, "wb") as buffer:
             shutil.copyfileobj(audio.file, buffer)
-        
+
         file_size = Path(temp_audio_path).stat().st_size
         print(f"📁 File saved: {file_size} bytes")
-        
-        # Run both providers
+
         print("🔄 Running Whisper STT...")
         whisper_result = run_single_provider(temp_audio_path, "whisper", attempt)
         print(f"✅ Whisper: {whisper_result.stt.text_raw}")
-        
+
         print("🔄 Running Google STT...")
         google_result = run_single_provider(temp_audio_path, "google", attempt)
         print(f"✅ Google: {google_result.stt.text_raw}")
-        
-        # Generate final response (using whisper as primary by default)
+
         final_response = generate_final_response(whisper_result)
-        
         processing_time_ms = int((time.time() - start_time) * 1000)
-        
+
         return ComparisonPipelineResult(
             request_id=request_id,
             file_name=original_filename,
@@ -328,45 +311,33 @@ async def compare_audio(
             final_response=final_response,
             processing_time_ms=processing_time_ms
         )
-        
+
     except Exception as e:
         print(f"❌ Error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# Keep original endpoint for backward compatibility
 @app.post("/stt/process", response_model=PipelineResult)
-async def process_audio(
-    audio: UploadFile = File(...),
-    attempt: int = 1
-):
-    """
-    Process audio through Whisper STT pipeline (original endpoint)
-    For comparison, use /stt/compare instead
-    """
+async def process_audio(audio: UploadFile = File(...), attempt: int = 1):
     start_time = time.time()
     request_id = str(uuid.uuid4())[:8]
-    
+
     Path("outputs").mkdir(exist_ok=True)
     temp_audio_path = f"outputs/temp_{request_id}.wav"
-    
+
     try:
         with open(temp_audio_path, "wb") as buffer:
             shutil.copyfileobj(audio.file, buffer)
-        
-        # Step 1: STT
+
         stt_result = whisper_adapter.transcribe(temp_audio_path)
-        
-        # Step 2: Quality Gate
         quality_result = quality_gate.evaluate(stt_result, attempt)
-        
-        # Step 3 & 4: Policy Gate + Response Generation
+
         policy_intent = None
         final_response = ""
-        
+
         if quality_result.status == "OK":
             policy_intent = policy_gate.classify(stt_result.text_raw or "")
-            
+
             if policy_intent.intent_type == "FIXED_LOCATION":
                 for loc in config["policy_gate"]["fixed_locations"]:
                     if loc["target"] == policy_intent.location_target:
@@ -374,16 +345,16 @@ async def process_audio(
                         break
             elif policy_intent.intent_type == "UNSUPPORTED":
                 final_response = config["policy_gate"]["fallback_message"]
-            else:  # PRODUCT_SEARCH
+            else:
                 final_response = f"[PRODUCT_SEARCH] '{stt_result.text_raw}' 검색 예정"
-                
+
         elif quality_result.status == "RETRY":
             final_response = config["policy_gate"]["retry_message"]
-        else:  # FAIL
+        else:
             final_response = "죄송합니다. 음성을 인식할 수 없었습니다."
-        
+
         processing_time_ms = int((time.time() - start_time) * 1000)
-        
+
         return PipelineResult(
             request_id=request_id,
             stt=stt_result,
@@ -393,7 +364,7 @@ async def process_audio(
             final_response=final_response,
             processing_time_ms=processing_time_ms
         )
-        
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

@@ -6,7 +6,7 @@ WORKDIR /app
 
 # System dependencies for scipy, scikit-learn, etc.
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc g++ curl && \
+    gcc g++ curl ffmpeg && \
     rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies first (Docker layer cache)
@@ -18,15 +18,18 @@ RUN pip install --no-cache-dir -r requirements.txt && \
 COPY backend/ ./backend/
 COPY poc/ ./poc/
 
-# Copy config and credentials
+# Copy config (NO credentials in image)
 COPY backend/config.yaml ./backend/config.yaml
-COPY backend/daisoproject-sst.json ./backend/daisoproject-sst.json
+# COPY backend/daisoproject-sst.json ./backend/daisoproject-sst.json
 
-# Environment: STT credentials path (relative, Docker-compatible)
-ENV GOOGLE_APPLICATION_CREDENTIALS=/app/backend/daisoproject-sst.json
+# Environment: STT credentials path (runtime secret mount)
+# (docker-compose에서 /run/secrets/daisoproject-sst.json 로 마운트됨)
+ENV GOOGLE_APPLICATION_CREDENTIALS=/run/secrets/daisoproject-sst.json
 
 # Non-root user for security
-RUN useradd --create-home appuser
+RUN useradd --create-home appuser \
+ && mkdir -p /app/outputs/normalized \
+ && chown -R appuser:appuser /app/outputs
 USER appuser
 
 # Expose port

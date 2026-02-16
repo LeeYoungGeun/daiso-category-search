@@ -16,6 +16,8 @@ class ElasticConfig:
     api_key: str = ""
     auth_header: str = ""
     timeout_s: int = 30
+    # [PATCH] init/health-check timeout (seconds)
+    health_timeout_s: float = 0.7
 
     @classmethod
     def from_env(cls) -> "ElasticConfig":
@@ -25,6 +27,7 @@ class ElasticConfig:
             api_key=os.getenv("ELASTIC_API_KEY", ""),
             auth_header=os.getenv("ELASTIC_AUTH_HEADER", ""),
             timeout_s=int(os.getenv("ELASTIC_TIMEOUT", "30")),
+            health_timeout_s=float(os.getenv("ELASTIC_HEALTH_TIMEOUT_S", os.getenv("HYBRID_HEALTH_TIMEOUT_S", "0.7"))),
         )
 
 
@@ -34,6 +37,8 @@ class QdrantConfig:
     collection: str = "products"
     api_key: str = ""
     timeout_s: int = 30
+    # [PATCH] init/health-check timeout (seconds)
+    health_timeout_s: float = 0.7
 
     @classmethod
     def from_env(cls) -> "QdrantConfig":
@@ -42,6 +47,7 @@ class QdrantConfig:
             collection=os.getenv("QDRANT_COLLECTION", "products"),
             api_key=os.getenv("QDRANT_API_KEY", ""),
             timeout_s=int(os.getenv("QDRANT_TIMEOUT", "30")),
+            health_timeout_s=float(os.getenv("QDRANT_HEALTH_TIMEOUT_S", os.getenv("HYBRID_HEALTH_TIMEOUT_S", "0.7"))),
         )
 
 
@@ -83,6 +89,10 @@ class HybridSearchConfig:
     redis: RedisConfig = field(default_factory=RedisConfig)
     embedding: EmbeddingConfig = field(default_factory=EmbeddingConfig)
 
+    # [PATCH] Hybrid init health-check timeout & circuit-breaker cooldown
+    init_health_timeout_s: float = 0.7
+    breaker_cooldown_s: float = 30.0
+
     # Fusion parameters
     top_k_bm25: int = 30
     top_k_dense: int = 30
@@ -98,6 +108,8 @@ class HybridSearchConfig:
             qdrant=QdrantConfig.from_env(),
             redis=RedisConfig.from_env(),
             embedding=EmbeddingConfig.from_env(),
+            init_health_timeout_s=float(os.getenv("HYBRID_HEALTH_TIMEOUT_S", "0.7")),
+            breaker_cooldown_s=float(os.getenv("HYBRID_BREAKER_COOLDOWN_S", "30")),
             top_k_bm25=int(os.getenv("SEARCH_TOP_K_BM25", "30")),
             top_k_dense=int(os.getenv("SEARCH_TOP_K_DENSE", "30")),
             top_k_fused=int(os.getenv("SEARCH_TOP_K_FUSED", "10")),

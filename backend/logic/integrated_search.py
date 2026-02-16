@@ -22,7 +22,15 @@ _project_root = str(Path(__file__).parent.parent.parent)
 if _project_root not in sys.path:
     sys.path.insert(0, _project_root)
 
-from poc.kms.nlu import analyze_text, expand_search_keywords
+try:
+    from poc.kms.nlu import analyze_text, expand_search_keywords
+except ImportError:
+    # 마지막 안전장치: nlu 모듈에 확장함수가 없더라도 서버 부팅은 되게 만든다.
+    from poc.kms.nlu import analyze_text  # type: ignore
+    async def expand_search_keywords(primary_keyword: str, return_usage: bool = False):
+        usage = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0, "latency_seconds": 0.0}
+        return ([], usage) if return_usage else ([], usage)
+
 from backend.logic.reranker import rerank_candidates
 from backend.search.cache import cache_get, cache_set
 from backend.logic.ambiguity import (
@@ -37,9 +45,60 @@ from backend.database.category_matcher import match_product_to_category
 
 logger = logging.getLogger(__name__)
 
+# [PATCH] 안전모드/기능 플래그 유틸
+def _env_bool(name: str, default: bool = False) -> bool:
+    v = os.getenv(name)
+    if v is None:
+        return default
+    return v.strip().lower() in ("1", "true", "yes", "y", "on")
+
+# [PATCH] SAFE_MODE: 외부 LLM 호출(의도분석/확장/리랭크)을 차단하고, 캐시/로컬 로직만 사용
+# - SAFE_MODE=1  : NLU/확장/리랭크의 외부 호출 금지(캐시 HIT는 사용 가능)
+# - DISABLE_HYBRID=1 : Elastic/Qdrant 하이브리드 검색 자체 비활성화(강제 SQLite fallback)
+SAFE_MODE = _env_bool("SAFE_MODE", False)
+DISABLE_HYBRID = _env_bool("DISABLE_HYBRID", False)
+
+# [PATCH] Hybrid init circuit breaker (프로세스 전역)
+_HYBRID_INIT_DISABLED_UNTIL = 0.0
+
+def _make_safe_nlu_result(query: str):
+    """Build a minimal NLU-like object to keep pipeline shape without external calls."""
+    class _Intent:
+        value = "PRODUCT_SEARCH"
+    class _Slots:
+        item = None
+        query_rewrite = query
+        attrs = {}
+        def model_dump(self):
+            return {"item": self.item, "query_rewrite": self.query_rewrite, "attrs": self.attrs}
+    class _NLU:
+        intent = _Intent()
+        slots = _Slots()
+        needs_clarification = False
+        token_usage = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
+    return _NLU()
+
+
 
 def _try_init_hybrid_search():
-    """Try to initialize hybrid search service. Returns None if unavailable."""
+    """Try to initialize hybrid search service. Returns None if unavailable.
+
+    [PATCH]
+    - DISABLE_HYBRID=1 이면 무조건 None
+    - init/health-check는 짧은 timeout 사용
+    - 실패 시 일정 시간(cooldown) 동안 재시도하지 않는 간단한 서킷브레이커 적용
+    """
+    global _HYBRID_INIT_DISABLED_UNTIL
+
+    if DISABLE_HYBRID:
+        logger.info("[PATCH] DISABLE_HYBRID=1 → hybrid init skipped")
+        return None
+
+    now = time.time()
+    if now < _HYBRID_INIT_DISABLED_UNTIL:
+        logger.info("[PATCH] Hybrid init circuit open (cooldown) → init skipped")
+        return None
+
     try:
         from backend.search.config import HybridSearchConfig
         from backend.search.hybrid import HybridSearchService
@@ -52,16 +111,23 @@ def _try_init_hybrid_search():
             return None
 
         service = HybridSearchService(config)
-        health = service.health_check()
+
+        # [PATCH] fast health-check
+        timeout_s = float(getattr(config, "init_health_timeout_s", float(os.getenv("HYBRID_HEALTH_TIMEOUT_S", "0.7"))))
+        health = service.health_check(timeout_s=timeout_s)
 
         if health.get("elasticsearch") and health.get("qdrant"):
             logger.info("✅ Hybrid search service initialized (Elasticsearch + Qdrant)")
             return service
-        else:
-            logger.warning(f"⚠️ Hybrid search services not fully healthy: {health}")
-            return None
+
+        logger.warning(f"⚠️ Hybrid search services not fully healthy: {health}")
+        cooldown = float(getattr(config, "breaker_cooldown_s", float(os.getenv("HYBRID_BREAKER_COOLDOWN_S", "30"))))
+        _HYBRID_INIT_DISABLED_UNTIL = time.time() + cooldown  # [PATCH] open circuit
+        return None
     except Exception as e:
         logger.warning(f"⚠️ Hybrid search init failed, falling back to SQLite: {e}")
+        cooldown = float(os.getenv("HYBRID_BREAKER_COOLDOWN_S", "30"))
+        _HYBRID_INIT_DISABLED_UNTIL = time.time() + cooldown  # [PATCH] open circuit on exception
         return None
 
 
@@ -77,13 +143,27 @@ class IntegratedSearchPipeline:
 
     def __init__(self):
         self.timing = {}
+        # [PATCH] per-instance breaker (hybrid search runtime failures)
+        self._hybrid_disabled_until = 0.0
+        self._breaker_cooldown_s = float(os.getenv("HYBRID_BREAKER_COOLDOWN_S", "30"))
+        self._safe_mode = SAFE_MODE
+        self._disable_hybrid = DISABLE_HYBRID
+
         self._hybrid_service = _try_init_hybrid_search()
         self._use_hybrid = self._hybrid_service is not None
 
     @property
     def search_mode(self) -> str:
         """Current search mode."""
-        return "hybrid" if self._use_hybrid else "sqlite_fallback"
+        return "hybrid" if self._hybrid_ready() else "sqlite_fallback"
+
+    # [PATCH] hybrid availability considering DISABLE_HYBRID + breaker cooldown
+    def _hybrid_ready(self) -> bool:
+        if self._disable_hybrid:
+            return False
+        if not self._use_hybrid:
+            return False
+        return time.time() >= self._hybrid_disabled_until
 
     async def search(
         self,
@@ -128,20 +208,29 @@ class IntegratedSearchPipeline:
             "clarification_count": clarification_count,
             "is_fallback": False,
             "timing_ms": {},
-            "metadata": {"search_mode": self.search_mode},
+            "metadata": {"search_mode": self.search_mode, "flags": {"safe_mode": self._safe_mode, "disable_hybrid": self._disable_hybrid}},  # [PATCH]
         }
 
         try:
             # Step 1: NLU - Intent Analysis & Keyword Extraction
             nlu_start = time.time()
-            nlu_result = await analyze_text(query, history=history)
+            if self._safe_mode:
+                # [PATCH] SAFE_MODE: 외부 NLU 호출 차단 (캐시/로컬만)
+                nlu_result = _make_safe_nlu_result(query)
+            else:
+                # NLU (compat): some versions of analyze_text() don't accept history
+                try:
+                    nlu_result = await analyze_text(query, history=history)
+                except TypeError:
+                    nlu_result = await analyze_text(query)
             nlu_time = int((time.time() - nlu_start) * 1000)
 
             result["intent"] = nlu_result.intent.value
             result["metadata"]["nlu"] = {
                 "slots": nlu_result.slots.model_dump(),
-                "needs_clarification": nlu_result.needs_clarification,
-                "token_usage": nlu_result.token_usage,
+                "needs_clarification": getattr(nlu_result, "needs_clarification", False),
+                "token_usage": getattr(nlu_result, "token_usage", {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}),
+                "safe_mode": self._safe_mode,  # [PATCH]
             }
 
             # Check if out of scope
@@ -168,12 +257,27 @@ class IntegratedSearchPipeline:
             search_keywords = []
             expand_cache_hit = False
 
-            # Primary keyword from NLU
+
+            # SAFE_MODE: 외부 키워드 확장/벤더 호출 차단
+            if self._safe_mode:
+                expanded_keywords = []
+                expand_usage = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0, "latency_seconds": 0.0}
+                result["metadata"]["keywords"] = {
+                    "expanded_keywords": expanded_keywords,
+                    "cache_hit": False,
+                    "token_usage": expand_usage,
+                    "safe_mode": True,
+                }
+                result["timing_ms"]["expand"] = 0
+                # continue to search with primary keyword only
+                        # Primary keyword from NLU
             primary_keyword = nlu_result.slots.item or nlu_result.slots.query_rewrite or query
             search_keywords.append(primary_keyword)
 
             # Try cache first for keyword expansion
-            cached_expansion = cache_get("expand", primary_keyword)
+            # [PATCH] cache key 직렬화: dict 기반(버전 포함)
+            expand_cache_key = {"v": 1, "primary": str(primary_keyword).strip()}
+            cached_expansion = cache_get("expand", expand_cache_key)
             if cached_expansion is not None:
                 expanded_keywords = cached_expansion
                 expand_usage = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
@@ -181,12 +285,18 @@ class IntegratedSearchPipeline:
                 logger.info(f"Cache HIT: keyword expansion for '{primary_keyword}'")
             else:
                 # Expand keywords using Gemini
-                expanded_keywords, expand_usage = await expand_search_keywords(
-                    primary_keyword,
-                    return_usage=True,
-                )
-                # Cache the expansion result
-                cache_set("expand", primary_keyword, expanded_keywords)
+                if self._safe_mode:
+                    # [PATCH] SAFE_MODE: 확장(외부 LLM) 호출 금지
+                    expanded_keywords = []
+                    expand_usage = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
+                else:
+                    # Expand keywords using Gemini
+                    expanded_keywords, expand_usage = await expand_search_keywords(
+                        primary_keyword,
+                        return_usage=True,
+                    )
+                    # Cache the expansion result
+                    cache_set("expand", expand_cache_key, expanded_keywords)
 
             search_keywords.extend(expanded_keywords[:3])  # Top 3 expansions
 
@@ -207,15 +317,30 @@ class IntegratedSearchPipeline:
             search_cache_hit = False
 
             # Try cache first for search results
-            cached_search = cache_get("search", search_keywords)
+            # [PATCH] cache key 직렬화: store_id + mode + keywords
+            effective_mode = "hybrid" if self._hybrid_ready() else "sqlite_fallback"
+            search_cache_key = {
+                "v": 2,
+                "store_id": store_id,
+                "mode": effective_mode,
+                "keywords": [str(k).strip() for k in search_keywords],
+            }
+            cached_search = cache_get("search", search_cache_key)
             if cached_search is not None:
                 candidates = cached_search
                 search_cache_hit = True
                 logger.info(f"Cache HIT: search results for {search_keywords}")
-            elif self._use_hybrid:
-                candidates = self._hybrid_search(search_keywords, result)
-                # Cache the search results
-                cache_set("search", search_keywords, candidates)
+            elif effective_mode == "hybrid":
+                try:
+                    candidates = self._hybrid_search(search_keywords, result)
+                    # Cache the search results
+                    cache_set("search", search_cache_key, candidates)
+                except Exception as e:
+                    # [PATCH] hybrid runtime failure → open circuit + fallback
+                    logger.warning(f"[PATCH] Hybrid search failed → fallback to SQLite: {e}")
+                    self._hybrid_disabled_until = time.time() + self._breaker_cooldown_s
+                    result.setdefault("metadata", {}).setdefault("search", {})["hybrid_error"] = str(e)
+                    candidates = self._sqlite_search(search_keywords)
             else:
                 candidates = self._sqlite_search(search_keywords)
 
@@ -225,7 +350,7 @@ class IntegratedSearchPipeline:
                 **result["metadata"].get("search", {}),
                 "candidates_count": len(candidates),
                 "keywords_used": search_keywords,
-                "mode": self.search_mode,
+                "mode": effective_mode,  # [PATCH] effective per-request mode
                 "cache_hit": search_cache_hit,
             }
 

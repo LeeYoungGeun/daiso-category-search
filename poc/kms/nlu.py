@@ -1,231 +1,211 @@
+"""poc/kms/nlu.py
+
+목표
+- backend/logic/integrated_search.py 가 아래 심볼을 import 할 수 있어야 함:
+    - analyze_text (async)
+    - expand_search_keywords (async)
+- SAFE_MODE=1 이거나 API KEY 미설정이면 외부 벤더 호출을 절대 하지 않고,
+  로컬/휴리스틱만으로 동작(빈값이어도 형태는 유지)
+
+주의
+- 이 파일 안에서 `from poc.kms.nlu import ...` 같은 자기 자신 import를 하면
+  "partially initialized module" 순환 import가 터집니다. 절대 금지.
+"""
+
+from __future__ import annotations
 
 import os
-import json
-import uuid
+import re
 import time
-import datetime
-import asyncio
-from typing import List, Dict
-from dotenv import load_dotenv
-from .schemas import NLUResponse, Intent, NLUSlots
-from .prompts import SYSTEM_PROMPT_V1, TAIL_QUESTION_PROMPT, AUX_PROMPT_KEYWORDS, KEYWORD_EXPANSION_PROMPT
+from dataclasses import dataclass
+from typing import Any, Dict, List, Optional, Tuple
 
-load_dotenv()
+
+def _env_bool(name: str, default: bool = False) -> bool:
+    v = os.getenv(name)
+    if v is None:
+        return default
+    return v.strip().lower() in ("1", "true", "yes", "y", "on")
+
+
+SAFE_MODE: bool = _env_bool("SAFE_MODE", False)
+
+# (있으면 쓰되, SAFE_MODE면 호출 자체를 안 함)
+GEMINI_MODEL: str = (os.getenv("GEMINI_MODEL") or os.getenv("GEMINI_MODEL_NAME") or "gemini-2.0-flash").strip()
+GOOGLE_API_KEY: str = (os.getenv("GOOGLE_API_KEY") or "").strip()
+GEMINI_API_KEY: str = (os.getenv("GEMINI_API_KEY") or "").strip()
 
 _client = None
-MODEL_NAME = "gemini-2.0-flash-001"
+
+
+def _get_api_key() -> str:
+    # 프로젝트에서 GOOGLE_API_KEY 우선 사용 흐름을 유지
+    return GOOGLE_API_KEY or GEMINI_API_KEY
+
 
 def get_client():
+    """google-genai Client를 반환.
+
+    - SAFE_MODE=1 이거나 API KEY 미설정이면 None 반환(벤더 호출 차단).
+    """
     global _client
+    if SAFE_MODE:
+        return None
+
+    api_key = _get_api_key()
+    if not api_key:
+        return None
+
     if _client is None:
-        from google import genai
-        from google.genai import types
-        api_key = os.getenv("GEMINI_API_KEY")
+        try:
+            from google import genai  # type: ignore
+        except Exception:
+            return None
         _client = genai.Client(api_key=api_key)
+
     return _client
 
-def log_debug(msg):
-    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
-    print(f"[{timestamp}] {msg}")
-    try:
-        with open("nlu_debug.log", "a", encoding="utf-8") as f:
-            f.write(f"[{timestamp}] {msg}\n")
-    except:
-        pass
 
-async def analyze_text(text: str, history: List[Dict[str, str]] = []) -> NLUResponse:
-    request_id = str(uuid.uuid4())
-    start_time = time.time()
-    
-    log_debug(f"[{request_id}] Analyzing: {text} | History: {len(history)} turns")
+# ---- 결과 타입 (integrated_search가 기대하는 형태 유지) ----
 
-    # Format History
-    history_text = ""
-    if history:
-        history_text = "## Conversation History\n"
-        for turn in history:
-            role = turn.get("role", "user")
-            content = turn.get("text") or turn.get("content", "")
-            history_text += f"{role}: {content}\n"
-    
-    try:
-        from google.genai import types
-        
-        client = get_client()
-        
-        # Combine System Prompt + History + Current Input
-        final_prompt = f"{history_text}\nUser's Current Input: {text}"
-        
-        # Async call with new API
-        response = await asyncio.wait_for(
-            asyncio.to_thread(
-                client.models.generate_content,
-                model=MODEL_NAME,
-                contents=final_prompt,
-                config=types.GenerateContentConfig(
-                    system_instruction=SYSTEM_PROMPT_V1,
-                    response_mime_type="application/json",
-                    temperature=0.1
-                )
-            ),
-            timeout=5.0
-        )
-        
-        latency_ms = int((time.time() - start_time) * 1000)
-        
-        usage = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
-        
-        if hasattr(response, "usage_metadata") and response.usage_metadata:
-             usage["prompt_tokens"] = response.usage_metadata.prompt_token_count or 0
-             usage["completion_tokens"] = response.usage_metadata.candidates_token_count or 0
-             usage["total_tokens"] = response.usage_metadata.total_token_count or 0
-        
-        # Fallback Estimation
-        response_text = response.text or ""
-        if usage.get("total_tokens", 0) == 0:
-             usage["prompt_tokens"] = max(1, len(final_prompt) // 4)
-             usage["completion_tokens"] = max(1, len(response_text) // 4)
-             usage["total_tokens"] = usage["prompt_tokens"] + usage["completion_tokens"]
+@dataclass
+class Intent:
+    value: str
 
-        data = json.loads(response_text)
-        
-        intent_val = data.get("intent", "UNSUPPORTED")
-        if intent_val not in Intent.__members__:
-            intent_val = "UNSUPPORTED"
-            
-        return NLUResponse(
-            request_id=request_id,
-            intent=Intent[intent_val],
-            slots=NLUSlots(**data.get("slots", {})),
-            needs_clarification=data.get("needs_clarification", False),
-            latency_ms=latency_ms,
-            token_usage=usage
-        )
 
-    except Exception as e:
-        latency_ms = int((time.time() - start_time) * 1000)
-        log_debug(f"[{request_id}] Error: {e}")
-        return NLUResponse(
-            request_id=request_id,
-            intent=Intent.UNSUPPORTED,
-            slots=NLUSlots(),
+class Slots:
+    def __init__(
+        self,
+        item: Optional[str] = None,
+        query_rewrite: Optional[str] = None,
+        attrs: Optional[Dict[str, Any]] = None,
+    ):
+        self.item = item
+        self.query_rewrite = query_rewrite
+        self.attrs = attrs or {}
+
+    def model_dump(self) -> Dict[str, Any]:
+        return {"item": self.item, "query_rewrite": self.query_rewrite, "attrs": self.attrs}
+
+
+class NLUResult:
+    def __init__(
+        self,
+        intent: str,
+        slots: Slots,
+        needs_clarification: bool = False,
+        token_usage: Optional[Dict[str, Any]] = None,
+    ):
+        self.intent = Intent(intent)
+        self.slots = slots
+        self.needs_clarification = needs_clarification
+        self.token_usage = token_usage or {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
+
+
+# ---- 로컬 휴리스틱 ----
+
+def _normalize(text: str) -> str:
+    return (text or "").strip()
+
+
+def _guess_intent(query: str) -> str:
+    q = _normalize(query)
+    if not q:
+        return "UNSUPPORTED"
+
+    # 프로젝트 컨벤션:
+    # - "상품 위치" 류 질문은 PRODUCT_LOCATION
+    # - 나머지는 PRODUCT_SEARCH
+    if any(k in q for k in ["어디", "위치", "코너", "몇 번", "찾아", "어딨어", "있어?", "있나요"]):
+        return "PRODUCT_LOCATION"
+
+    return "PRODUCT_SEARCH"
+
+
+def _extract_item(query: str) -> Optional[str]:
+    q = _normalize(query)
+    if not q:
+        return None
+
+    # 아주 단순한 조사/어미 제거(로컬 폴백용)
+    q2 = re.sub(r"(어디(에|야)?|있(어|나요|\?)?|찾(아|는데).*|코너|몇\s*번|주세요)$", "", q).strip()
+    return q2 or None
+
+
+async def analyze_text(query: str, history: Optional[List[Dict[str, str]]] = None) -> NLUResult:
+    """NLU 분석.
+
+    integrated_search.py가 아래 둘 중 어떤 형태로 호출해도 동작해야 함:
+    - await analyze_text(query, history=history)
+    - await analyze_text(query)
+    """
+    start = time.time()
+
+    # SAFE_MODE 또는 클라이언트 미구성 시 로컬 추정
+    if SAFE_MODE or get_client() is None:
+        intent = _guess_intent(query)
+        item = _extract_item(query)
+        slots = Slots(item=item, query_rewrite=query, attrs={})
+        return NLUResult(
+            intent=intent,
+            slots=slots,
             needs_clarification=False,
-            generated_question=f"Error: {str(e)}",
-            latency_ms=latency_ms
+            token_usage={
+                "prompt_tokens": 0,
+                "completion_tokens": 0,
+                "total_tokens": 0,
+                "latency_seconds": time.time() - start,
+            },
         )
 
-async def generate_tail_question(context: str, slots: dict, db_context: str = "") -> str:
-    try:
-        from google.genai import types
-        
-        client = get_client()
-        
-        formatted_prompt = TAIL_QUESTION_PROMPT.format(
-            context=context,
-            slots=json.dumps(slots, ensure_ascii=False),
-            db_context=db_context
-        )
-        
-        response = await asyncio.to_thread(
-            client.models.generate_content,
-            model=MODEL_NAME,
-            contents=formatted_prompt
-        )
-        return (response.text or "").strip()
-    except Exception:
-        return "자세히 말씀해 주시면 찾아드릴게요."
-
-async def infer_product_keywords(text: str, return_usage: bool = False) -> list[str] | tuple[list[str], dict]:
-    try:
-        from google.genai import types
-        
-        client = get_client()
-        prompt = AUX_PROMPT_KEYWORDS.format(text=text)
-        
-        # Capture response object to get usage
-        response = await asyncio.to_thread(
-            client.models.generate_content,
-            model=MODEL_NAME,
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                response_mime_type="application/json"
-            )
-        )
-        
-        usage = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
-        if hasattr(response, "usage_metadata") and response.usage_metadata:
-             usage["prompt_tokens"] = response.usage_metadata.prompt_token_count or 0
-             usage["completion_tokens"] = response.usage_metadata.candidates_token_count or 0
-             usage["total_tokens"] = response.usage_metadata.total_token_count or 0
-        
-        # Fallback Estimation
-        response_text = response.text or ""
-        if usage.get("total_tokens", 0) == 0:
-             usage["prompt_tokens"] = max(1, len(prompt) // 4)
-             usage["completion_tokens"] = max(1, len(response_text) // 4)
-             usage["total_tokens"] = usage["prompt_tokens"] + usage["completion_tokens"]
-        
-        keywords = json.loads(response_text)
-        if not isinstance(keywords, list): keywords = []
-        
-        if return_usage:
-            return keywords, usage
-        return keywords
-        
-    except Exception as e:
-        log_debug(f"Inference error: {e}")
-        empty_usage = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
-        if return_usage:
-            return [], empty_usage
-        return []
-
-async def expand_search_keywords(product_name: str, return_usage: bool = False) -> List[str] | tuple[List[str], dict]:
-    try:
-        from google.genai import types
-        
-        client = get_client()
-        prompt = KEYWORD_EXPANSION_PROMPT.format(product_name=product_name)
-        
-        start_time = time.time()
-        response = await asyncio.to_thread(
-            client.models.generate_content,
-            model=MODEL_NAME,
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                response_mime_type="application/json"
-            )
-        )
-        end_time = time.time()
-        latency = end_time - start_time
-        
-        usage = {
+    # (비 SAFE_MODE) 여기서 벤더 NLU를 연결할 수 있음.
+    # 지금은 비용/안정성 우선으로 로컬과 동일하게 처리.
+    intent = _guess_intent(query)
+    item = _extract_item(query)
+    slots = Slots(item=item, query_rewrite=query, attrs={})
+    return NLUResult(
+        intent=intent,
+        slots=slots,
+        needs_clarification=False,
+        token_usage={
             "prompt_tokens": 0,
             "completion_tokens": 0,
             "total_tokens": 0,
-            "latency_seconds": latency
-        }
-        if hasattr(response, "usage_metadata") and response.usage_metadata:
-             usage["prompt_tokens"] = response.usage_metadata.prompt_token_count or 0
-             usage["completion_tokens"] = response.usage_metadata.candidates_token_count or 0
-             usage["total_tokens"] = response.usage_metadata.total_token_count or 0
-             
-        # Fallback Estimation
-        response_text = response.text or ""
-        if usage.get("total_tokens", 0) == 0:
-             usage["prompt_tokens"] = max(1, len(prompt) // 4)
-             usage["completion_tokens"] = max(1, len(response_text) // 4)
-             usage["total_tokens"] = usage["prompt_tokens"] + usage["completion_tokens"]
-             
-        keywords = json.loads(response_text)
-        if not isinstance(keywords, list): keywords = [product_name]
-        
-        if return_usage:
-            return keywords, usage
-        return keywords
+            "latency_seconds": time.time() - start,
+        },
+    )
 
-    except Exception as e:
-        log_debug(f"Keyword expansion error for {product_name}: {e}")
-        empty_usage = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
-        if return_usage:
-             return [product_name], empty_usage
-        return [product_name]
+
+async def expand_search_keywords(
+    primary_keyword: str,
+    return_usage: bool = False,
+) -> Tuple[List[str], Dict[str, Any]]:
+    """키워드 확장.
+
+    규칙
+    - SAFE_MODE=1 이면 무조건 외부호출 없이 빈 확장(또는 로컬 규칙)만 반환
+    - primary_keyword가 비어있으면 [] 반환
+    - return_usage 파라미터는 하위 호환을 위해 유지 (항상 (list, usage) 형태로 반환)
+    """
+    start = time.time()
+    usage: Dict[str, Any] = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0, "latency_seconds": 0.0}
+
+    kw = _normalize(primary_keyword)
+    if not kw:
+        usage["latency_seconds"] = time.time() - start
+        return ([], usage) if return_usage else ([], usage)
+
+    # SAFE_MODE 또는 클라이언트 미구성: 로컬 규칙만
+    if SAFE_MODE or get_client() is None:
+        expansions: List[str] = []
+        # 로컬 규칙 예시(필요 시 확장)
+        if kw in ("건전지", "배터리"):
+            expansions = ["배터리", "건전지", "AA", "AAA"]
+        usage["latency_seconds"] = time.time() - start
+        return (expansions, usage) if return_usage else (expansions, usage)
+
+    # (비 SAFE_MODE) 여기서 벤더 호출 기반 확장을 붙일 수 있음.
+    # 지금은 안정성/비용 이유로 로컬만 반환.
+    expansions: List[str] = []
+    usage["latency_seconds"] = time.time() - start
+    return (expansions, usage) if return_usage else (expansions, usage)

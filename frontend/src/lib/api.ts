@@ -2,278 +2,216 @@
  * API client for backend communication
  * - REST: /v1/search
  * - WebSocket: /ws/stt
+ *
+ * 운영 권장:
+ * - nginx가 동일 호스트에서 /v1, /ws 를 프록시하도록 구성되어 있으면
+ *   NEXT_PUBLIC_API_URL을 비우거나(권장) http://3.39.6.105 처럼 "포트 없는" 값으로 설정한다.
+ * - NEXT_PUBLIC_API_URL이 비어있으면 same-origin 상대경로로 호출한다:
+ *   fetch("/v1/search"), new WebSocket("ws://{host}/ws/stt")
  */
+import type { SearchRequest, SearchResponse, STTServerMessage } from "@/types/search";
 
-import type {
-    SearchRequest,
-    SearchResponse,
-    STTServerMessage,
-} from "@/types/search";
+const RAW_BASE = (process.env.NEXT_PUBLIC_API_URL || "").trim();
+const API_BASE = RAW_BASE.length > 0 ? RAW_BASE : "";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-const WS_BASE = API_BASE.replace(/^http/, "ws");
+const WS_BASE =
+  API_BASE.length > 0
+    ? API_BASE.replace(/^http/, "ws")
+    : typeof window !== "undefined"
+      ? `${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.host}`
+      : "";
 
 // ============================================================================
 // REST API: Search
 // ============================================================================
+export async function searchProducts(request: SearchRequest): Promise<SearchResponse> {
+  const body: SearchRequest = {
+    store_id: request.store_id || "store_001",
+    input_type: request.input_type || "text",
+    query: request.query,
+    session_id: request.session_id,
+    history: request.history,
+    clarification_count: request.clarification_count || 0,
+  };
 
-export async function searchProducts(
-    request: SearchRequest
-): Promise<SearchResponse> {
-    const body: SearchRequest = {
-        store_id: request.store_id || "store_001",
-        input_type: request.input_type || "text",
-        query: request.query,
-        session_id: request.session_id,
-        history: request.history,
-        clarification_count: request.clarification_count || 0,
-    };
+  const url = `${API_BASE}/v1/search`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
 
-    const res = await fetch(`${API_BASE}/v1/search`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-    });
-
-    if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(`Search API error (${res.status}): ${errorText}`);
-    }
-
-    return res.json();
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`Search API error (${res.status}): ${errorText}`);
+  }
+  return res.json();
 }
 
 // ============================================================================
 // Health Check
 // ============================================================================
-
-export async function healthCheck(): Promise<{
-    status: string;
-    [key: string]: unknown;
-}> {
-    const res = await fetch(`${API_BASE}/health`);
-    if (!res.ok) {
-        throw new Error(`Health check failed: ${res.status}`);
-    }
-    return res.json();
+export async function healthCheck(): Promise<{ status: string; [key: string]: unknown }> {
+  const url = `${API_BASE}/health`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Health check failed: ${res.status}`);
+  return res.json();
 }
 
 // ============================================================================
 // WebSocket STT Client
 // ============================================================================
-
 export interface STTCallbacks {
-    onStarted?: (runId: string) => void;
-    onInterim?: (text: string) => void;
-    onFinal?: (text: string, confidence: number, status: string) => void;
-    onError?: (message: string) => void;
-    onClose?: () => void;
+  onStarted?: (runId: string) => void;
+  onInterim?: (text: string) => void;
+  onFinal?: (text: string, confidence: number, status: string) => void;
+  onError?: (message: string) => void;
+  onClose?: () => void;
 }
 
 export class STTWebSocketClient {
-    private ws: WebSocket | null = null;
-    private audioContext: AudioContext | null = null;
-    private mediaStream: MediaStream | null = null;
-    private processor: ScriptProcessorNode | null = null;
-    private source: MediaStreamAudioSourceNode | null = null;
-    private seqCounter = 0;
-    private callbacks: STTCallbacks;
-    private isRecording = false;
+  private ws: WebSocket | null = null;
+  private audioContext: AudioContext | null = null;
+  private mediaStream: MediaStream | null = null;
+  private processor: ScriptProcessorNode | null = null;
+  private source: MediaStreamAudioSourceNode | null = null;
 
-    constructor(callbacks: STTCallbacks) {
-        this.callbacks = callbacks;
+  private seqCounter = 0;
+  private callbacks: STTCallbacks;
+  private isRecording = false;
+
+  constructor(callbacks: STTCallbacks) {
+    this.callbacks = callbacks;
+  }
+
+  async start(): Promise<void> {
+    const wsUrl = `${WS_BASE}/ws/stt`;
+    this.ws = new WebSocket(wsUrl);
+    this.seqCounter = 0;
+
+    this.ws.onmessage = (event) => {
+      try {
+        const msg: STTServerMessage = JSON.parse(event.data);
+        this.handleMessage(msg);
+      } catch {
+        console.error("Failed to parse STT message:", event.data);
+      }
+    };
+
+    this.ws.onerror = () => {
+      this.callbacks.onError?.("WebSocket 연결 오류가 발생했습니다.");
+    };
+
+    this.ws.onclose = () => {
+      this.isRecording = false;
+      this.callbacks.onClose?.();
+    };
+
+    await new Promise<void>((resolve, reject) => {
+      if (!this.ws) return reject(new Error("No WebSocket"));
+      const ws = this.ws;
+      const timer = setTimeout(() => reject(new Error("WebSocket connection timeout")), 5000);
+      ws.onopen = () => {
+        clearTimeout(timer);
+        resolve();
+      };
+      const origOnClose = ws.onclose;
+      ws.onclose = (ev) => {
+        origOnClose?.call(ws, ev);
+        clearTimeout(timer);
+        if (ws.readyState !== WebSocket.OPEN) reject(new Error("WebSocket이 연결 전에 닫혔습니다."));
+      };
+    });
+
+    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+      throw new Error("WebSocket이 이미 닫혔습니다.");
     }
 
-    /**
-     * Start STT session: connect WebSocket + start microphone capture
-     */
-    async start(): Promise<void> {
-        // 1. Connect WebSocket
-        this.ws = new WebSocket(`${WS_BASE}/ws/stt`);
-        this.seqCounter = 0;
+    this.ws.send(
+      JSON.stringify({
+        type: "start",
+        config: { sample_rate: 16000, language: "ko-KR" },
+        meta: { run_id: `web_${Date.now()}`, test_id: `session_${Date.now()}` },
+      })
+    );
 
-        this.ws.onmessage = (event) => {
-            try {
-                const msg: STTServerMessage = JSON.parse(event.data);
-                this.handleMessage(msg);
-            } catch {
-                console.error("Failed to parse STT message:", event.data);
-            }
-        };
+    await this.startMicrophone();
+  }
 
-        this.ws.onerror = (event) => {
-            console.error("WebSocket error:", event);
-            this.callbacks.onError?.("WebSocket 연결 오류가 발생했습니다.");
-        };
+  private async startMicrophone(): Promise<void> {
+    try {
+      this.mediaStream = await navigator.mediaDevices.getUserMedia({
+        audio: { sampleRate: 16000, channelCount: 1, echoCancellation: true, noiseSuppression: true },
+      });
 
-        this.ws.onclose = () => {
-            this.isRecording = false;
-            this.callbacks.onClose?.();
-        };
+      this.audioContext = new AudioContext({ sampleRate: 16000 });
+      this.source = this.audioContext.createMediaStreamSource(this.mediaStream);
 
-        // Wait for connection
-        await new Promise<void>((resolve, reject) => {
-            if (!this.ws) return reject(new Error("No WebSocket"));
-            const ws = this.ws;
-            ws.onopen = () => resolve();
-            // Also reject if the socket closes before opening (server not running)
-            const origOnClose = ws.onclose;
-            ws.onclose = (ev) => {
-                origOnClose?.call(ws, ev);
-                reject(new Error("WebSocket이 연결 전에 닫혔습니다. 백엔드 서버가 실행 중인지 확인하세요."));
-            };
-            setTimeout(() => reject(new Error("WebSocket connection timeout")), 5000);
-        });
+      this.processor = this.audioContext.createScriptProcessor(4096, 1, 1);
+      this.isRecording = true;
 
-        // Guard: stop() may have been called while awaiting (e.g. React strict mode cleanup)
-        if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-            throw new Error("WebSocket이 이미 닫혔습니다.");
+      this.processor.onaudioprocess = (event) => {
+        if (!this.isRecording || !this.ws || this.ws.readyState !== WebSocket.OPEN) return;
+
+        const inputData = event.inputBuffer.getChannelData(0);
+        const pcm16 = new Int16Array(inputData.length);
+
+        for (let i = 0; i < inputData.length; i++) {
+          const s = Math.max(-1, Math.min(1, inputData[i]));
+          pcm16[i] = s < 0 ? (s * 0x8000) | 0 : (s * 0x7fff) | 0;
         }
 
-        // 2. Send start message
-        this.ws.send(
-            JSON.stringify({
-                type: "start",
-                config: { sample_rate: 16000, language: "ko-KR" },
-                meta: {
-                    run_id: `web_${Date.now()}`,
-                    test_id: `session_${Date.now()}`,
-                },
-            })
-        );
+        const bytes = new Uint8Array(pcm16.buffer);
+        let binary = "";
+        for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+        const pcmB64 = btoa(binary);
 
-        // 3. Start microphone capture
-        await this.startMicrophone();
+        this.ws!.send(JSON.stringify({ type: "audio", pcm_b64: pcmB64, seq: this.seqCounter++ }));
+      };
+
+      this.source.connect(this.processor);
+      this.processor.connect(this.audioContext.destination);
+    } catch (err) {
+      console.error("Microphone access error:", err);
+      this.callbacks.onError?.("마이크 접근 권한이 필요합니다.");
+      throw err;
     }
+  }
 
-    /**
-     * Start capturing microphone audio and sending to WebSocket
-     */
-    private async startMicrophone(): Promise<void> {
-        try {
-            this.mediaStream = await navigator.mediaDevices.getUserMedia({
-                audio: {
-                    sampleRate: 16000,
-                    channelCount: 1,
-                    echoCancellation: true,
-                    noiseSuppression: true,
-                },
-            });
-
-            this.audioContext = new AudioContext({ sampleRate: 16000 });
-            this.source = this.audioContext.createMediaStreamSource(this.mediaStream);
-
-            // Use ScriptProcessorNode for PCM capture (4096 samples per buffer)
-            this.processor = this.audioContext.createScriptProcessor(4096, 1, 1);
-            this.isRecording = true;
-
-            this.processor.onaudioprocess = (event) => {
-                if (!this.isRecording || !this.ws || this.ws.readyState !== WebSocket.OPEN) {
-                    return;
-                }
-
-                const inputData = event.inputBuffer.getChannelData(0);
-
-                // Convert Float32 to Int16 PCM
-                const pcm16 = new Int16Array(inputData.length);
-                for (let i = 0; i < inputData.length; i++) {
-                    const s = Math.max(-1, Math.min(1, inputData[i]));
-                    pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
-                }
-
-                // Convert to base64
-                const bytes = new Uint8Array(pcm16.buffer);
-                let binary = "";
-                for (let i = 0; i < bytes.length; i++) {
-                    binary += String.fromCharCode(bytes[i]);
-                }
-                const pcmB64 = btoa(binary);
-
-                // Send audio chunk
-                this.ws!.send(
-                    JSON.stringify({
-                        type: "audio",
-                        pcm_b64: pcmB64,
-                        seq: this.seqCounter++,
-                    })
-                );
-            };
-
-            this.source.connect(this.processor);
-            this.processor.connect(this.audioContext.destination);
-        } catch (err) {
-            console.error("Microphone access error:", err);
-            this.callbacks.onError?.("마이크 접근 권한이 필요합니다.");
-            throw err;
-        }
+  private handleMessage(msg: STTServerMessage): void {
+    switch (msg.type) {
+      case "started":
+        this.callbacks.onStarted?.(msg.run_id);
+        break;
+      case "interim":
+        this.callbacks.onInterim?.(msg.text);
+        break;
+      case "final":
+        this.callbacks.onFinal?.(msg.text, msg.meta?.confidence ?? 0, msg.status);
+        this.stop();
+        break;
+      case "error":
+        this.callbacks.onError?.(msg.message);
+        break;
     }
+  }
 
-    /**
-     * Handle incoming WebSocket messages
-     */
-    private handleMessage(msg: STTServerMessage): void {
-        switch (msg.type) {
-            case "started":
-                this.callbacks.onStarted?.(msg.run_id);
-                break;
-            case "interim":
-                this.callbacks.onInterim?.(msg.text);
-                break;
-            case "final":
-                this.callbacks.onFinal?.(
-                    msg.text,
-                    msg.meta?.confidence ?? 0,
-                    msg.status
-                );
-                // Auto-stop after final result
-                this.stop();
-                break;
-            case "error":
-                this.callbacks.onError?.(msg.message);
-                break;
-        }
+  stop(): void {
+    this.isRecording = false;
+
+    if (this.processor) { this.processor.disconnect(); this.processor = null; }
+    if (this.source) { this.source.disconnect(); this.source = null; }
+    if (this.audioContext) { this.audioContext.close().catch(() => {}); this.audioContext = null; }
+    if (this.mediaStream) { this.mediaStream.getTracks().forEach((t) => t.stop()); this.mediaStream = null; }
+
+    if (this.ws) {
+      try { if (this.ws.readyState === WebSocket.OPEN) this.ws.send(JSON.stringify({ type: "stop" })); } catch {}
+      try { this.ws.close(); } catch {}
+      this.ws = null;
     }
+  }
 
-    /**
-     * Stop STT session: stop microphone + close WebSocket
-     */
-    stop(): void {
-        this.isRecording = false;
-
-        // Stop microphone
-        if (this.processor) {
-            this.processor.disconnect();
-            this.processor = null;
-        }
-        if (this.source) {
-            this.source.disconnect();
-            this.source = null;
-        }
-        if (this.audioContext) {
-            this.audioContext.close().catch(() => { });
-            this.audioContext = null;
-        }
-        if (this.mediaStream) {
-            this.mediaStream.getTracks().forEach((track) => track.stop());
-            this.mediaStream = null;
-        }
-
-        // Send stop message and close WebSocket
-        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-            try {
-                this.ws.send(JSON.stringify({ type: "stop" }));
-            } catch {
-                // ignore
-            }
-            this.ws.close();
-        }
-        this.ws = null;
-    }
-
-    /**
-     * Check if currently recording
-     */
-    get recording(): boolean {
-        return this.isRecording;
-    }
+  get recording(): boolean {
+    return this.isRecording;
+  }
 }

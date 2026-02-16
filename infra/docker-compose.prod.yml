@@ -31,7 +31,7 @@ services:
     env_file:
       - ../.env
     volumes:
-      - ../backend/database/products.db:/app/backend/database/products.db:ro
+      - ../backend/database:/app/backend/database:ro
     depends_on:
       elasticsearch:
         condition: service_healthy

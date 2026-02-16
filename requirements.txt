@@ -62,6 +62,10 @@ uritemplate==4.2.0
 urllib3==2.6.3
 uvicorn==0.40.0
 
+pydub==0.25.1
+
+
+
 # Additional dependencies from original daiso-category-search
 python-dotenv==1.0.1
 pandas>=2.2.0
@@ -80,3 +84,6 @@ qrcode[pil]>=7.4.2
 
 # WebSocket support (compatible with google-genai)
 websockets>=13.0.0,<15.1.0
+
+faster-whisper
+google-cloud-speech==2.26.1

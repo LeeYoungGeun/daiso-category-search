@@ -16,6 +16,34 @@ from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
+# [PATCH] Cache key 직렬화 강화:
+# - dict key order 뿐 아니라 list/tuple/set 등 비정형 타입도 안정적으로 직렬화
+# - json.dumps 실패 시 repr 기반 fallback로 key 생성이 깨지지 않도록 처리
+def _normalize_key_data(data: Any) -> Any:
+    """Normalize key data into JSON-serializable deterministic structure."""
+    if data is None:
+        return None
+    # Primitive JSON types
+    if isinstance(data, (str, int, float, bool)):
+        return data
+    # Bytes -> decode best-effort
+    if isinstance(data, (bytes, bytearray)):
+        try:
+            return data.decode("utf-8", errors="replace")
+        except Exception:
+            return str(data)
+    # Dict -> sort keys via json.dumps(sort_keys=True) later
+    if isinstance(data, dict):
+        return {str(k): _normalize_key_data(v) for k, v in data.items()}
+    # List/Tuple -> preserve order (order can be semantically meaningful)
+    if isinstance(data, (list, tuple)):
+        return [_normalize_key_data(x) for x in data]
+    # Set -> sort to be deterministic
+    if isinstance(data, set):
+        return sorted(_normalize_key_data(x) for x in data)
+    # Fallback: stringify
+    return str(data)
+
 _redis_client = None
 _redis_available = None  # tri-state: None=not checked, True/False
 
@@ -52,8 +80,15 @@ def _get_redis():
 
 
 def _make_key(prefix: str, data: Any) -> str:
-    """Create a deterministic cache key from prefix + data."""
-    raw = json.dumps(data, sort_keys=True, ensure_ascii=False)
+    """Generate deterministic Redis cache key."""
+    # NOTE: 기존 키 포맷(daiso:{prefix}:{16-hex})은 유지하되,
+    #       key_data 직렬화를 더 안전하게 만듭니다.  # [PATCH]
+    norm = _normalize_key_data(data)
+    try:
+        raw = json.dumps(norm, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    except Exception:
+        raw = repr(norm)  # [PATCH] serialization fail-safe
+
     h = hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
     return f"daiso:{prefix}:{h}"
 

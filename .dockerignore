@@ -42,3 +42,10 @@ backend/database/product_embeddings/
 # Docs / artifacts
 .gemini
 *.md
+
+# secrets / credentials (never send to docker build context)
+backend/daisoproject-sst.json
+secrets/
+infra/certs/
+.env
+.env.*

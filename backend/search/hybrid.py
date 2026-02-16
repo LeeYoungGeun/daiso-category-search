@@ -55,12 +55,14 @@ class SearchResult:
 class ElasticBM25Client:
     """Elasticsearch BM25 retriever."""
 
-    def __init__(self, url: str, index: str, api_key: str = "", auth_header: str = "", timeout_s: int = 30):
+    def __init__(self, url: str, index: str, api_key: str = "", auth_header: str = "", timeout_s: int = 30, health_timeout_s: float = 0.7):  # [PATCH]
         self.url = url.rstrip("/")
         self.index = index
         self.api_key = api_key
         self.auth_header = auth_header
         self.timeout_s = timeout_s
+        self.health_timeout_s = health_timeout_s  # [PATCH] init/health-check timeout
+
 
     def _headers(self) -> Dict[str, str]:
         h: Dict[str, str] = {"Content-Type": "application/json"}
@@ -76,10 +78,15 @@ class ElasticBM25Client:
                 h["Authorization"] = f"ApiKey {key}"
         return h
 
-    def health_check(self) -> bool:
-        """Check if Elasticsearch is reachable."""
+    def health_check(self, timeout_s: float | None = None) -> bool:
+        """Check if Elasticsearch is reachable (fast health ping)."""
         try:
-            r = requests.get(f"{self.url}/_cluster/health", headers=self._headers(), timeout=5)
+            t = float(timeout_s) if timeout_s is not None else float(getattr(self, "health_timeout_s", 0.7))
+            r = requests.get(
+                f"{self.url}/_cluster/health",
+                headers=self._headers(),
+                timeout=t,
+            )
             return r.status_code == 200
         except Exception:
             return False
@@ -138,11 +145,12 @@ class ElasticBM25Client:
 class QdrantVectorClient:
     """Qdrant dense vector retriever."""
 
-    def __init__(self, url: str, collection: str, api_key: str = "", timeout_s: int = 30):
+    def __init__(self, url: str, collection: str, api_key: str = "", timeout_s: int = 30, health_timeout_s: float = 0.7):  # [PATCH]
         self.url = url.rstrip("/")
         self.collection = collection
         self.api_key = api_key
         self.timeout_s = timeout_s
+        self.health_timeout_s = health_timeout_s  # [PATCH] init/health-check timeout
 
     def _headers(self) -> Dict[str, str]:
         h: Dict[str, str] = {"Content-Type": "application/json"}
@@ -150,10 +158,15 @@ class QdrantVectorClient:
             h["api-key"] = self.api_key
         return h
 
-    def health_check(self) -> bool:
-        """Check if Qdrant is reachable."""
+    def health_check(self, timeout_s: float | None = None) -> bool:
+        """Check if Qdrant is reachable (fast health ping)."""
         try:
-            r = requests.get(f"{self.url}/healthz", headers=self._headers(), timeout=5)
+            t = float(timeout_s) if timeout_s is not None else float(getattr(self, "health_timeout_s", 0.7))
+            r = requests.get(
+                f"{self.url}/healthz",
+                headers=self._headers(),
+                timeout=t,
+            )
             return r.status_code == 200
         except Exception:
             return False
@@ -306,12 +319,14 @@ class HybridSearchService:
             api_key=self.config.elastic.api_key,
             auth_header=self.config.elastic.auth_header,
             timeout_s=self.config.elastic.timeout_s,
+            health_timeout_s=getattr(self.config.elastic, "health_timeout_s", 0.7),  # [PATCH]
         )
         self.qdrant = QdrantVectorClient(
             url=self.config.qdrant.url,
             collection=self.config.qdrant.collection,
             api_key=self.config.qdrant.api_key,
             timeout_s=self.config.qdrant.timeout_s,
+            health_timeout_s=getattr(self.config.qdrant, "health_timeout_s", 0.7),  # [PATCH]
         )
 
         # Initialize embedding adapter
@@ -329,11 +344,11 @@ class HybridSearchService:
             f"embedding={self.config.embedding.provider}/{self.config.embedding.model}"
         )
 
-    def health_check(self) -> Dict[str, bool]:
-        """Check health of all external services."""
+    def health_check(self, timeout_s: float | None = None) -> Dict[str, bool]:
+        """Check health of all external services (fast ping)."""
         return {
-            "elasticsearch": self.elastic.health_check(),
-            "qdrant": self.qdrant.health_check(),
+            "elasticsearch": self.elastic.health_check(timeout_s=timeout_s),
+            "qdrant": self.qdrant.health_check(timeout_s=timeout_s),
         }
 
     def search(
