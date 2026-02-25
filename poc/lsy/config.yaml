@@ -65,7 +65,7 @@ postprocessing:
 
 # Whisper Fallback 설정 (Google Streaming 실패 시)
 fallback:
-  enabled: true
+  enabled: false
   buffer_max_sec: 15             # Ring buffer 최대 유지 (초)
   whisper:
     model_size: "base"           # Lightsail 2GB RAM 최적화: medium → base (~150MB)

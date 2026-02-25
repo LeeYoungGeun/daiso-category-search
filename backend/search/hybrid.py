@@ -8,13 +8,13 @@ Usage:
 
     cfg = HybridSearchConfig.from_env()
     svc = HybridSearchService(cfg)
-    results = svc.search("욕실 매트", top_k=10)
+    results = svc.search("욕실 매트", top_k=10, mode="bm25_only")
 """
+
 from __future__ import annotations
 
-import re
+import os
 import time
-import uuid
 import logging
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
@@ -31,7 +31,6 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class ScoredDoc:
-    """A document with a relevance score."""
     doc_id: str
     score: float
     source: str = ""          # "bm25", "dense", "fused"
@@ -43,7 +42,6 @@ class ScoredDoc:
 
 @dataclass
 class SearchResult:
-    """Result of a hybrid search."""
     query: str
     docs: List[ScoredDoc]
     timing_ms: Dict[str, int] = field(default_factory=dict)
@@ -53,16 +51,21 @@ class SearchResult:
 # ─── Elasticsearch BM25 Client ───────────────────────────────────────────────
 
 class ElasticBM25Client:
-    """Elasticsearch BM25 retriever."""
-
-    def __init__(self, url: str, index: str, api_key: str = "", auth_header: str = "", timeout_s: int = 30, health_timeout_s: float = 0.7):  # [PATCH]
-        self.url = url.rstrip("/")
+    def __init__(
+        self,
+        url: str,
+        index: str,
+        api_key: str = "",
+        auth_header: str = "",
+        timeout_s: int = 30,
+        health_timeout_s: float = 0.7,
+    ):
+        self.url = (url or "").rstrip("/")
         self.index = index
         self.api_key = api_key
         self.auth_header = auth_header
         self.timeout_s = timeout_s
-        self.health_timeout_s = health_timeout_s  # [PATCH] init/health-check timeout
-
+        self.health_timeout_s = health_timeout_s
 
     def _headers(self) -> Dict[str, str]:
         h: Dict[str, str] = {"Content-Type": "application/json"}
@@ -78,21 +81,18 @@ class ElasticBM25Client:
                 h["Authorization"] = f"ApiKey {key}"
         return h
 
-    def health_check(self, timeout_s: float | None = None) -> bool:
-        """Check if Elasticsearch is reachable (fast health ping)."""
+    def health_check(self) -> bool:
         try:
-            t = float(timeout_s) if timeout_s is not None else float(getattr(self, "health_timeout_s", 0.7))
             r = requests.get(
                 f"{self.url}/_cluster/health",
                 headers=self._headers(),
-                timeout=t,
+                timeout=self.health_timeout_s,
             )
             return r.status_code == 200
         except Exception:
             return False
 
     def search(self, query_text: str, *, top_k: int = 30) -> List[ScoredDoc]:
-        """BM25 search on bm25_text field."""
         qt = (query_text or "").strip()
         if not qt:
             return []
@@ -101,13 +101,7 @@ class ElasticBM25Client:
         body: Dict[str, Any] = {
             "size": int(top_k),
             "track_total_hits": False,
-            "query": {
-                "match": {
-                    "bm25_text": {
-                        "query": qt,
-                    }
-                }
-            },
+            "query": {"match": {"bm25_text": {"query": qt}}},
         }
 
         try:
@@ -122,18 +116,20 @@ class ElasticBM25Client:
             for h in hits:
                 doc_id = str(h.get("_id") or "")
                 score = float(h.get("_score") or 0.0)
-                source_data = h.get("_source") or {}
+                src = h.get("_source") or {}
                 if not doc_id:
                     continue
-                out.append(ScoredDoc(
-                    doc_id=doc_id,
-                    score=score,
-                    source="bm25",
-                    title=source_data.get("title", ""),
-                    text=source_data.get("text", ""),
-                    category=source_data.get("category", ""),
-                    payload=source_data,
-                ))
+                out.append(
+                    ScoredDoc(
+                        doc_id=doc_id,
+                        score=score,
+                        source="bm25",
+                        title=src.get("title", ""),
+                        text=src.get("text", ""),
+                        category=src.get("category", ""),
+                        payload=src,
+                    )
+                )
             return out
         except Exception as e:
             logger.error(f"Elastic search error: {e}")
@@ -143,14 +139,19 @@ class ElasticBM25Client:
 # ─── Qdrant Vector Client ────────────────────────────────────────────────────
 
 class QdrantVectorClient:
-    """Qdrant dense vector retriever."""
-
-    def __init__(self, url: str, collection: str, api_key: str = "", timeout_s: int = 30, health_timeout_s: float = 0.7):  # [PATCH]
-        self.url = url.rstrip("/")
+    def __init__(
+        self,
+        url: str,
+        collection: str,
+        api_key: str = "",
+        timeout_s: int = 30,
+        health_timeout_s: float = 0.7,
+    ):
+        self.url = (url or "").rstrip("/")
         self.collection = collection
         self.api_key = api_key
         self.timeout_s = timeout_s
-        self.health_timeout_s = health_timeout_s  # [PATCH] init/health-check timeout
+        self.health_timeout_s = health_timeout_s
 
     def _headers(self) -> Dict[str, str]:
         h: Dict[str, str] = {"Content-Type": "application/json"}
@@ -158,21 +159,14 @@ class QdrantVectorClient:
             h["api-key"] = self.api_key
         return h
 
-    def health_check(self, timeout_s: float | None = None) -> bool:
-        """Check if Qdrant is reachable (fast health ping)."""
+    def health_check(self) -> bool:
         try:
-            t = float(timeout_s) if timeout_s is not None else float(getattr(self, "health_timeout_s", 0.7))
-            r = requests.get(
-                f"{self.url}/healthz",
-                headers=self._headers(),
-                timeout=t,
-            )
+            r = requests.get(f"{self.url}/healthz", headers=self._headers(), timeout=self.health_timeout_s)
             return r.status_code == 200
         except Exception:
             return False
 
     def search(self, query_vector: List[float], *, top_k: int = 30) -> List[ScoredDoc]:
-        """Vector similarity search."""
         if not query_vector:
             return []
 
@@ -204,22 +198,24 @@ class QdrantVectorClient:
                         continue
                     doc_id = str(pid)
 
-                out.append(ScoredDoc(
-                    doc_id=doc_id,
-                    score=score,
-                    source="dense",
-                    title=payload.get("title", ""),
-                    text=payload.get("text", ""),
-                    category=payload.get("category", ""),
-                    payload=payload,
-                ))
+                out.append(
+                    ScoredDoc(
+                        doc_id=doc_id,
+                        score=score,
+                        source="dense",
+                        title=payload.get("title", ""),
+                        text=payload.get("text", ""),
+                        category=payload.get("category", ""),
+                        payload=payload,
+                    )
+                )
             return out
         except Exception as e:
             logger.error(f"Qdrant search error: {e}")
             return []
 
 
-# ─── Fusion Functions ─────────────────────────────────────────────────────────
+# ─── Fusion ──────────────────────────────────────────────────────────────────
 
 def rrf_fusion(
     dense: List[ScoredDoc],
@@ -228,10 +224,6 @@ def rrf_fusion(
     rrf_k: int = 60,
     top_k: int = 10,
 ) -> List[ScoredDoc]:
-    """Reciprocal Rank Fusion.
-
-    score(doc) = sum(1 / (rrf_k + rank))
-    """
     scores: Dict[str, float] = {}
     doc_map: Dict[str, ScoredDoc] = {}
 
@@ -241,18 +233,20 @@ def rrf_fusion(
             if sd.doc_id not in doc_map:
                 doc_map[sd.doc_id] = sd
 
-    merged = []
+    merged: List[ScoredDoc] = []
     for doc_id, score in scores.items():
         base = doc_map[doc_id]
-        merged.append(ScoredDoc(
-            doc_id=doc_id,
-            score=score,
-            source="fused",
-            title=base.title,
-            text=base.text,
-            category=base.category,
-            payload=base.payload,
-        ))
+        merged.append(
+            ScoredDoc(
+                doc_id=doc_id,
+                score=score,
+                source="fused",
+                title=base.title,
+                text=base.text,
+                category=base.category,
+                payload=base.payload,
+            )
+        )
     merged.sort(key=lambda x: x.score, reverse=True)
     return merged[:top_k]
 
@@ -264,7 +258,6 @@ def weighted_fusion(
     alpha: float = 0.5,
     top_k: int = 10,
 ) -> List[ScoredDoc]:
-    """Weighted sum after per-list min-max normalization."""
     doc_map: Dict[str, ScoredDoc] = {}
 
     def norm(lst: List[ScoredDoc]) -> Dict[str, float]:
@@ -288,18 +281,20 @@ def weighted_fusion(
     for k in keys:
         scores[k] = alpha * nd.get(k, 0.0) + (1 - alpha) * ns.get(k, 0.0)
 
-    merged = []
+    merged: List[ScoredDoc] = []
     for doc_id, score in scores.items():
         base = doc_map[doc_id]
-        merged.append(ScoredDoc(
-            doc_id=doc_id,
-            score=score,
-            source="fused",
-            title=base.title,
-            text=base.text,
-            category=base.category,
-            payload=base.payload,
-        ))
+        merged.append(
+            ScoredDoc(
+                doc_id=doc_id,
+                score=score,
+                source="fused",
+                title=base.title,
+                text=base.text,
+                category=base.category,
+                payload=base.payload,
+            )
+        )
     merged.sort(key=lambda x: x.score, reverse=True)
     return merged[:top_k]
 
@@ -307,48 +302,57 @@ def weighted_fusion(
 # ─── Hybrid Search Service ───────────────────────────────────────────────────
 
 class HybridSearchService:
-    """Main hybrid search service combining BM25 + Vector + Fusion."""
-
     def __init__(self, config: Optional[HybridSearchConfig] = None):
         self.config = config or HybridSearchConfig.from_env()
 
-        # Initialize clients
         self.elastic = ElasticBM25Client(
             url=self.config.elastic.url,
             index=self.config.elastic.index,
             api_key=self.config.elastic.api_key,
             auth_header=self.config.elastic.auth_header,
             timeout_s=self.config.elastic.timeout_s,
-            health_timeout_s=getattr(self.config.elastic, "health_timeout_s", 0.7),  # [PATCH]
+            health_timeout_s=self.config.elastic.health_timeout_s,
         )
         self.qdrant = QdrantVectorClient(
             url=self.config.qdrant.url,
             collection=self.config.qdrant.collection,
             api_key=self.config.qdrant.api_key,
             timeout_s=self.config.qdrant.timeout_s,
-            health_timeout_s=getattr(self.config.qdrant, "health_timeout_s", 0.7),  # [PATCH]
+            health_timeout_s=self.config.qdrant.health_timeout_s,
         )
 
-        # Initialize embedding adapter
-        self.embedder: EmbeddingAdapter = build_embedding_adapter(
-            provider=self.config.embedding.provider,
-            model=self.config.embedding.model,
-            api_key=self.config.embedding.api_key,
-            output_dimensionality=self.config.embedding.output_dimensionality,
-        )
+        # LAZY: dense/hybrid에서만 생성
+        self._embedder: Optional[EmbeddingAdapter] = None
 
         logger.info(
-            f"HybridSearchService initialized: "
+            "HybridSearchService initialized: "
             f"elastic={self.config.elastic.url}/{self.config.elastic.index}, "
             f"qdrant={self.config.qdrant.url}/{self.config.qdrant.collection}, "
             f"embedding={self.config.embedding.provider}/{self.config.embedding.model}"
         )
 
-    def health_check(self, timeout_s: float | None = None) -> Dict[str, bool]:
-        """Check health of all external services (fast ping)."""
+    def _ensure_embedder(self) -> EmbeddingAdapter:
+        if self._embedder is not None:
+            return self._embedder
+
+        # 키는 provider마다 필요할 수 있음(google/openai 등). 없으면 여기서만 실패해야 함.
+        api_key = (self.config.embedding.api_key or "").strip()
+        provider = (self.config.embedding.provider or "").strip()
+        if provider and provider.lower() != "mock" and not api_key:
+            raise RuntimeError("Missing Google API key. Set GEMINI_API_KEY or GOOGLE_API_KEY.")
+
+        self._embedder = build_embedding_adapter(
+            provider=self.config.embedding.provider,
+            model=self.config.embedding.model,
+            api_key=self.config.embedding.api_key,
+            output_dimensionality=self.config.embedding.output_dimensionality,
+        )
+        return self._embedder
+
+    def health_check(self) -> Dict[str, bool]:
         return {
-            "elasticsearch": self.elastic.health_check(timeout_s=timeout_s),
-            "qdrant": self.qdrant.health_check(timeout_s=timeout_s),
+            "elasticsearch": self.elastic.health_check(),
+            "qdrant": self.qdrant.health_check(),
         }
 
     def search(
@@ -356,88 +360,82 @@ class HybridSearchService:
         query: str,
         *,
         top_k: Optional[int] = None,
-        mode: str = "hybrid",
+        mode: Optional[str] = None,
     ) -> SearchResult:
-        """Execute hybrid search.
-
-        Args:
-            query: Search query text
-            top_k: Number of results to return (default: config.top_k_fused)
-            mode: "hybrid" (default), "bm25_only", "dense_only"
-
-        Returns:
-            SearchResult with fused documents and timing info
         """
+        mode:
+          - "hybrid" (bm25 + dense + fusion)
+          - "bm25_only"
+          - "dense_only"
+        """
+        # 기본 모드: 환경변수로 강제 가능
+        #   SEARCH_MODE=bm25_only  (또는 dense_only/hybrid)
+        # mode 인자가 있으면 그게 최우선
+        if mode is None:
+            mode = (os.getenv("SEARCH_MODE", "") or "").strip() or "hybrid"
+        mode = mode.strip()
+
         top_k = top_k or self.config.top_k_fused
         timing: Dict[str, int] = {}
-        metadata: Dict[str, Any] = {"mode": mode, "query": query}
+        metadata: Dict[str, Any] = {
+            "mode": mode,
+            "fusion_method": self.config.fusion_method,
+            "query": query,
+        }
 
         bm25_results: List[ScoredDoc] = []
         dense_results: List[ScoredDoc] = []
 
-        # ── BM25 Search ──
+        # BM25
         if mode in ("hybrid", "bm25_only"):
             t0 = time.time()
-            bm25_results = self.elastic.search(
-                query, top_k=self.config.top_k_bm25
-            )
+            bm25_results = self.elastic.search(query, top_k=self.config.top_k_bm25)
             timing["bm25_ms"] = int((time.time() - t0) * 1000)
             metadata["bm25_count"] = len(bm25_results)
 
-        # ── Dense (Vector) Search ──
+        # Dense
         if mode in ("hybrid", "dense_only"):
             t0 = time.time()
-            query_vec = self.embedder.embed_query(query)
+            query_vec = self._ensure_embedder().embed_query(query)
             timing["embed_ms"] = int((time.time() - t0) * 1000)
 
             t0 = time.time()
-            dense_results = self.qdrant.search(
-                query_vec, top_k=self.config.top_k_dense
-            )
+            dense_results = self.qdrant.search(query_vec, top_k=self.config.top_k_dense)
             timing["dense_ms"] = int((time.time() - t0) * 1000)
             metadata["dense_count"] = len(dense_results)
 
-        # ── Fusion ──
+        # Fusion / fallback
         if mode == "hybrid" and bm25_results and dense_results:
             t0 = time.time()
             if self.config.fusion_method == "weighted":
-                fused = weighted_fusion(
+                docs = weighted_fusion(
                     dense_results,
                     bm25_results,
                     alpha=self.config.fusion_alpha,
                     top_k=top_k,
                 )
             else:
-                fused = rrf_fusion(
+                docs = rrf_fusion(
                     dense_results,
                     bm25_results,
                     rrf_k=self.config.rrf_k,
                     top_k=top_k,
                 )
             timing["fusion_ms"] = int((time.time() - t0) * 1000)
-            docs = fused
         elif mode == "bm25_only":
             docs = bm25_results[:top_k]
         elif mode == "dense_only":
             docs = dense_results[:top_k]
         else:
-            # Fallback: use whichever has results
             docs = (bm25_results or dense_results)[:top_k]
 
         timing["total_ms"] = sum(timing.values())
         metadata["result_count"] = len(docs)
 
-        return SearchResult(
-            query=query,
-            docs=docs,
-            timing_ms=timing,
-            metadata=metadata,
-        )
+        return SearchResult(query=query, docs=docs, timing_ms=timing, metadata=metadata)
 
     def search_bm25_only(self, query: str, *, top_k: int = 10) -> SearchResult:
-        """Convenience: BM25-only search."""
         return self.search(query, top_k=top_k, mode="bm25_only")
 
     def search_dense_only(self, query: str, *, top_k: int = 10) -> SearchResult:
-        """Convenience: Dense-only search."""
         return self.search(query, top_k=top_k, mode="dense_only")

@@ -1,0 +1,28 @@
+services:
+  api:
+    environment:
+      SAFE_MODE: "0"
+      FORCE_SQLITE: "0"
+      DISABLE_HYBRID: "0"
+
+      # 1사이클은 dense_only 권장(임베딩/벡터만 검증)
+      SEARCH_MODE: "dense_only"   # 또는 "hybrid"
+
+      # Server B endpoints
+      ELASTIC_URL: "http://54.180.1.204:9200"
+      ELASTIC_INDEX: "products"
+      QDRANT_URL: "http://54.180.1.204:6333"
+      QDRANT_COLLECTION: "products"
+      REDIS_URL: "redis://54.180.1.204:6379/0"
+
+      # vendor on
+      VENDOR_ENABLED: "true"
+      VENDOR_SAMPLE_RATE: "1.0"
+      VENDOR_MAX_CALLS_PER_MIN: "20"
+
+      # embedding
+      EMBEDDING_PROVIDER: "google"
+      EMBEDDING_MODEL: "gemini-embedding-001"
+
+      # rerank (처음엔 OFF)
+      RERANK_MODE: "off"

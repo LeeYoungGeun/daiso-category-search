@@ -20,12 +20,8 @@ services:
       PYTHONDONTWRITEBYTECODE: "1"
       GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/daisoproject-sst.json
       SEARCH_MODE: "hybrid"
-      RERANK_TIMEOUT: "12"
-      RERANK_EARLY_HIT: "0"
-      RERANK_VENDOR_TOPN: "3"
     volumes:
-      - ../backend:/app/backend
-      # - ../backend/database:/app/backend/database:ro
+      - ../backend/database:/app/backend/database:ro
       - ../secrets/daisoproject-sst.json:/run/secrets/daisoproject-sst.json:ro
     restart: always
     healthcheck:
@@ -55,7 +51,7 @@ services:
       context: ../frontend
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: ""
+        NEXT_PUBLIC_API_URL: http://3.39.6.105:8000
     container_name: daiso-frontend
     ports:
       - "3000:3000"

@@ -897,9 +897,16 @@ async def handle_streaming_stt(websocket: WebSocket, credentials_path: str = Non
     session = None
     
     try:
-        while True:
+        while True:            
             data = await websocket.receive_text()
-            msg = json.loads(data)
+            if not data or not data.strip():
+                continue
+            try:
+                msg = json.loads(data)
+            except json.JSONDecodeError:
+                await websocket.send_json({"type": "error", "message": "INVALID_JSON"})
+                continue
+            
             
             if msg["type"] == "start":
                 print("▶️ Start session request")

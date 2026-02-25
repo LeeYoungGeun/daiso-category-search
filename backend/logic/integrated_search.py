@@ -1,36 +1,30 @@
 """
-Integrated Search Pipeline
-Combines NLU → Hybrid Search (BM25+Vector+RRF) → Ambiguity Detection → Rerank → Location
-
-M1 Update: Replaced SQLite LIKE search with Hybrid Search (Elasticsearch + Qdrant).
-M2 Update: Added ambiguity detection, follow-up questions, 2-strike fallback, enhanced reranking.
-
-Falls back to SQLite LIKE if external services are unavailable.
+Integrated Search Pipeline (BM25-only safe by default)
+- NLU (local / vendor-off)
+- Keyword expansion:
+    - SAFE_MODE=1 or VENDOR_ENABLED!=true => NO external calls (no Gemini)
+- Search:
+    - SEARCH_MODE=bm25_only => Elasticsearch BM25 only (NO Qdrant, NO embedding)
+    - SEARCH_MODE=dense_only => Qdrant dense only (requires embedding)
+    - SEARCH_MODE=hybrid => BM25 + Dense + Fusion (requires embedding)
+    - If ES is unavailable => SQLite fallback
+- Ambiguity:
+    - Reduced false-positive in bm25_only when top3 are same major category
 """
 
 import os
-import json
 import time
 import uuid
 import logging
 from typing import List, Dict, Any, Optional
 from pathlib import Path
-
-# Ensure project root is in path for absolute imports
 import sys
+
 _project_root = str(Path(__file__).parent.parent.parent)
 if _project_root not in sys.path:
     sys.path.insert(0, _project_root)
 
-try:
-    from poc.kms.nlu import analyze_text, expand_search_keywords
-except ImportError:
-    # 마지막 안전장치: nlu 모듈에 확장함수가 없더라도 서버 부팅은 되게 만든다.
-    from poc.kms.nlu import analyze_text  # type: ignore
-    async def expand_search_keywords(primary_keyword: str, return_usage: bool = False):
-        usage = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0, "latency_seconds": 0.0}
-        return ([], usage) if return_usage else ([], usage)
-
+from poc.kms.nlu import analyze_text, expand_search_keywords
 from backend.logic.reranker import rerank_candidates
 from backend.search.cache import cache_get, cache_set
 from backend.logic.ambiguity import (
@@ -45,125 +39,124 @@ from backend.database.category_matcher import match_product_to_category
 
 logger = logging.getLogger(__name__)
 
-# [PATCH] 안전모드/기능 플래그 유틸
+
 def _env_bool(name: str, default: bool = False) -> bool:
     v = os.getenv(name)
     if v is None:
         return default
     return v.strip().lower() in ("1", "true", "yes", "y", "on")
 
-# [PATCH] SAFE_MODE: 외부 LLM 호출(의도분석/확장/리랭크)을 차단하고, 캐시/로컬 로직만 사용
-# - SAFE_MODE=1  : NLU/확장/리랭크의 외부 호출 금지(캐시 HIT는 사용 가능)
-# - DISABLE_HYBRID=1 : Elastic/Qdrant 하이브리드 검색 자체 비활성화(강제 SQLite fallback)
-SAFE_MODE = _env_bool("SAFE_MODE", False)
-DISABLE_HYBRID = _env_bool("DISABLE_HYBRID", False)
 
-# [PATCH] Hybrid init circuit breaker (프로세스 전역)
-_HYBRID_INIT_DISABLED_UNTIL = 0.0
-
-def _make_safe_nlu_result(query: str):
-    """Build a minimal NLU-like object to keep pipeline shape without external calls."""
-    class _Intent:
-        value = "PRODUCT_SEARCH"
-    class _Slots:
-        item = None
-        query_rewrite = query
-        attrs = {}
-        def model_dump(self):
-            return {"item": self.item, "query_rewrite": self.query_rewrite, "attrs": self.attrs}
-    class _NLU:
-        intent = _Intent()
-        slots = _Slots()
-        needs_clarification = False
-        token_usage = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
-    return _NLU()
+def _env_str(name: str, default: str = "") -> str:
+    v = os.getenv(name)
+    return v if v is not None else default
 
 
+def _effective_search_mode() -> str:
+    mode = _env_str("SEARCH_MODE", "hybrid").strip().lower()
+    if mode in ("bm25_only", "dense_only", "hybrid", "auto"):
+        return mode
+    return "hybrid"
 
-def _try_init_hybrid_search():
-    """Try to initialize hybrid search service. Returns None if unavailable.
 
-    [PATCH]
-    - DISABLE_HYBRID=1 이면 무조건 None
-    - init/health-check는 짧은 timeout 사용
-    - 실패 시 일정 시간(cooldown) 동안 재시도하지 않는 간단한 서킷브레이커 적용
-    """
-    global _HYBRID_INIT_DISABLED_UNTIL
+def _vendor_allowed() -> bool:
+    if _env_bool("SAFE_MODE", False):
+        return False
+    return _env_bool("VENDOR_ENABLED", False)
 
-    if DISABLE_HYBRID:
-        logger.info("[PATCH] DISABLE_HYBRID=1 → hybrid init skipped")
-        return None
 
-    now = time.time()
-    if now < _HYBRID_INIT_DISABLED_UNTIL:
-        logger.info("[PATCH] Hybrid init circuit open (cooldown) → init skipped")
-        return None
-
+def _try_init_hybrid_service():
     try:
         from backend.search.config import HybridSearchConfig
         from backend.search.hybrid import HybridSearchService
 
-        config = HybridSearchConfig.from_env()
+        cfg = HybridSearchConfig.from_env()
 
-        # Only init if URLs are configured
-        if not config.elastic.url or not config.qdrant.url:
-            logger.info("Hybrid search not configured (missing ELASTIC_URL or QDRANT_URL)")
+        if not getattr(cfg.elastic, "url", None):
+            logger.warning("Hybrid search not configured: missing ELASTIC_URL")
             return None
 
-        service = HybridSearchService(config)
+        if not getattr(cfg.qdrant, "url", None):
+            logger.warning("Hybrid search not configured: missing QDRANT_URL")
+            return None
 
-        # [PATCH] fast health-check
-        timeout_s = float(getattr(config, "init_health_timeout_s", float(os.getenv("HYBRID_HEALTH_TIMEOUT_S", "0.7"))))
-        health = service.health_check(timeout_s=timeout_s)
+        svc = HybridSearchService(cfg)
 
-        if health.get("elasticsearch") and health.get("qdrant"):
-            logger.info("✅ Hybrid search service initialized (Elasticsearch + Qdrant)")
-            return service
+        try:
+            health = svc.health_check()
+            logger.warning(f"[HYBRID health] raw={health}")
+        except Exception as e:
+            logger.warning(f"⚠️ HYBRID health_check failed: {e}")
 
-        logger.warning(f"⚠️ Hybrid search services not fully healthy: {health}")
-        cooldown = float(getattr(config, "breaker_cooldown_s", float(os.getenv("HYBRID_BREAKER_COOLDOWN_S", "30"))))
-        _HYBRID_INIT_DISABLED_UNTIL = time.time() + cooldown  # [PATCH] open circuit
-        return None
+        logger.info("✅ Hybrid search service initialized (BM25 + Dense available)")
+        return svc
+
     except Exception as e:
-        logger.warning(f"⚠️ Hybrid search init failed, falling back to SQLite: {e}")
-        cooldown = float(os.getenv("HYBRID_BREAKER_COOLDOWN_S", "30"))
-        _HYBRID_INIT_DISABLED_UNTIL = time.time() + cooldown  # [PATCH] open circuit on exception
+        logger.warning(f"⚠️ Hybrid init failed (fallback to BM25/SQLite): {e}")
+        return None
+
+
+def _try_init_bm25_service():
+    try:
+        from backend.search.config import HybridSearchConfig
+        from backend.search.hybrid import HybridSearchService
+
+        cfg = HybridSearchConfig.from_env()
+
+        if not getattr(cfg.elastic, "url", None):
+            logger.info("BM25 search not configured (missing ELASTIC_URL)")
+            return None
+
+        svc = HybridSearchService(cfg)
+
+        try:
+            health = svc.health_check()
+            es_ok = bool(health.get("elasticsearch"))
+            if not es_ok:
+                logger.warning(f"⚠️ Elasticsearch not healthy: {health}")
+                return None
+        except Exception as e:
+            logger.warning(f"⚠️ BM25 health_check failed: {e}")
+            return None
+
+        logger.info("✅ BM25 search service initialized (Elasticsearch only)")
+
+        health = svc.health_check()
+        logger.warning(f"[BM25 health] raw={health}")
+
+        return svc
+
+    except Exception as e:
+        logger.warning(f"⚠️ BM25 init failed, fallback to SQLite: {e}")
         return None
 
 
 class IntegratedSearchPipeline:
-    """
-    Integrated pipeline for product search
-    Pipeline: NLU → Keyword Expansion → Hybrid Search → Ambiguity Check → Rerank → Location
-
-    M1: Uses Elasticsearch (BM25) + Qdrant (Vector) + RRF Fusion
-    M2: Ambiguity detection, follow-up questions, 2-strike fallback
-    Fallback: SQLite LIKE search if external services unavailable
-    """
-
     def __init__(self):
         self.timing = {}
-        # [PATCH] per-instance breaker (hybrid search runtime failures)
-        self._hybrid_disabled_until = 0.0
-        self._breaker_cooldown_s = float(os.getenv("HYBRID_BREAKER_COOLDOWN_S", "30"))
-        self._safe_mode = SAFE_MODE
-        self._disable_hybrid = DISABLE_HYBRID
 
-        self._hybrid_service = _try_init_hybrid_search()
+        self._hybrid_service = _try_init_hybrid_service()
         self._use_hybrid = self._hybrid_service is not None
+
+        self._bm25_service = _try_init_bm25_service()
+        self._use_bm25 = self._bm25_service is not None
 
     @property
     def search_mode(self) -> str:
-        """Current search mode."""
-        return "hybrid" if self._hybrid_ready() else "sqlite_fallback"
+        if _env_bool("FORCE_SQLITE", False):
+            return "sqlite_fallback"
 
-    # [PATCH] hybrid availability considering DISABLE_HYBRID + breaker cooldown
-    def _hybrid_ready(self) -> bool:
-        if self._disable_hybrid:
-            return False
-        if not self._use_hybrid:
-            return False
-        return time.time() >= self._hybrid_disabled_until
+        mode = _effective_search_mode()
+
+        if mode == "bm25_only":
+            return "bm25_only" if self._use_bm25 else "sqlite_fallback"
+
+        if mode in ("dense_only", "hybrid", "auto"):
+            if self._use_hybrid:
+                return mode
+            return "bm25_only" if self._use_bm25 else "sqlite_fallback"
+
+        return "sqlite_fallback"
 
     async def search(
         self,
@@ -172,27 +165,14 @@ class IntegratedSearchPipeline:
         session_id: Optional[str] = None,
         history: Optional[List[Dict[str, str]]] = None,
         clarification_count: int = 0,
+        input_type: str = "text",
+        rerank_mode_override: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """
-        Execute full search pipeline with M2 ambiguity handling.
-
-        Args:
-            query: User query text
-            store_id: Store identifier
-            session_id: Session identifier for context
-            history: Conversation history
-            clarification_count: Number of previous clarification attempts (for 2-strike fallback)
-
-        Returns:
-            Dict with search results, clarification info, and metadata
-        """
         request_id = str(uuid.uuid4())
         start_time = time.time()
+        history = history or []
 
-        if history is None:
-            history = []
-
-        result = {
+        result: Dict[str, Any] = {
             "request_id": request_id,
             "query": query,
             "store_id": store_id,
@@ -201,108 +181,66 @@ class IntegratedSearchPipeline:
             "intent": None,
             "top3": [],
             "top1_handover": None,
-            # M2: Clarification fields
             "needs_clarification": False,
             "clarification_question": None,
             "clarification_options": [],
             "clarification_count": clarification_count,
             "is_fallback": False,
             "timing_ms": {},
-            "metadata": {"search_mode": self.search_mode, "flags": {"safe_mode": self._safe_mode, "disable_hybrid": self._disable_hybrid}},  # [PATCH]
+            "metadata": {"search_mode": self.search_mode},
+            "error": None,
         }
 
+        # ✅ 관측값 박제(early return 포함)
+        result["metadata"]["input_type"] = input_type
+        result["metadata"]["rerank_mode_override"] = (rerank_mode_override or None)
+
         try:
-            # Step 1: NLU - Intent Analysis & Keyword Extraction
+            # 1) NLU
             nlu_start = time.time()
-            if self._safe_mode:
-                # [PATCH] SAFE_MODE: 외부 NLU 호출 차단 (캐시/로컬만)
-                nlu_result = _make_safe_nlu_result(query)
-            else:
-                # NLU (compat): some versions of analyze_text() don't accept history
-                try:
-                    nlu_result = await analyze_text(query, history=history)
-                except TypeError:
-                    nlu_result = await analyze_text(query)
+            nlu_result = await analyze_text(query, history=history)
             nlu_time = int((time.time() - nlu_start) * 1000)
 
             result["intent"] = nlu_result.intent.value
             result["metadata"]["nlu"] = {
                 "slots": nlu_result.slots.model_dump(),
-                "needs_clarification": getattr(nlu_result, "needs_clarification", False),
-                "token_usage": getattr(nlu_result, "token_usage", {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}),
-                "safe_mode": self._safe_mode,  # [PATCH]
+                "needs_clarification": nlu_result.needs_clarification,
+                "token_usage": nlu_result.token_usage,
             }
 
-            # Check if out of scope
             if nlu_result.intent.value == "UNSUPPORTED":
                 result["is_in_scope"] = False
                 result["message"] = "죄송합니다. 상품 찾기 외의 질문은 아직 답변하기 어렵습니다."
-                result["timing_ms"] = {
-                    "nlu": nlu_time,
-                    "total": int((time.time() - start_time) * 1000),
-                }
+                result["timing_ms"] = {"nlu": nlu_time, "total": int((time.time() - start_time) * 1000)}
                 return result
 
             if nlu_result.intent.value == "OTHER_INQUIRY":
                 result["is_in_scope"] = False
                 result["message"] = "일반 문의는 매장 직원에게 문의해 주세요."
-                result["timing_ms"] = {
-                    "nlu": nlu_time,
-                    "total": int((time.time() - start_time) * 1000),
-                }
+                result["timing_ms"] = {"nlu": nlu_time, "total": int((time.time() - start_time) * 1000)}
                 return result
 
-            # Step 2: Keyword Expansion (with Redis cache)
+            # 2) Keyword expansion
             expand_start = time.time()
-            search_keywords = []
             expand_cache_hit = False
 
-
-            # SAFE_MODE: 외부 키워드 확장/벤더 호출 차단
-            if self._safe_mode:
-                expanded_keywords = []
-                expand_usage = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0, "latency_seconds": 0.0}
-                result["metadata"]["keywords"] = {
-                    "expanded_keywords": expanded_keywords,
-                    "cache_hit": False,
-                    "token_usage": expand_usage,
-                    "safe_mode": True,
-                }
-                result["timing_ms"]["expand"] = 0
-                # continue to search with primary keyword only
-                        # Primary keyword from NLU
             primary_keyword = nlu_result.slots.item or nlu_result.slots.query_rewrite or query
-            search_keywords.append(primary_keyword)
+            search_keywords = [primary_keyword]
 
-            # Try cache first for keyword expansion
-            # [PATCH] cache key 직렬화: dict 기반(버전 포함)
-            expand_cache_key = {"v": 1, "primary": str(primary_keyword).strip()}
-            cached_expansion = cache_get("expand", expand_cache_key)
+            cached_expansion = cache_get("expand", primary_keyword)
             if cached_expansion is not None:
                 expanded_keywords = cached_expansion
                 expand_usage = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
                 expand_cache_hit = True
-                logger.info(f"Cache HIT: keyword expansion for '{primary_keyword}'")
             else:
-                # Expand keywords using Gemini
-                if self._safe_mode:
-                    # [PATCH] SAFE_MODE: 확장(외부 LLM) 호출 금지
-                    expanded_keywords = []
-                    expand_usage = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
+                if _vendor_allowed():
+                    expanded_keywords, expand_usage = await expand_search_keywords(primary_keyword, return_usage=True)
                 else:
-                    # Expand keywords using Gemini
-                    expanded_keywords, expand_usage = await expand_search_keywords(
-                        primary_keyword,
-                        return_usage=True,
-                    )
-                    # Cache the expansion result
-                    cache_set("expand", expand_cache_key, expanded_keywords)
+                    expanded_keywords, expand_usage = [], {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
+                cache_set("expand", primary_keyword, expanded_keywords)
 
-            search_keywords.extend(expanded_keywords[:3])  # Top 3 expansions
-
-            # Remove duplicates while preserving order
+            search_keywords.extend(expanded_keywords[:3])
             search_keywords = list(dict.fromkeys(search_keywords))
-
             expand_time = int((time.time() - expand_start) * 1000)
 
             result["metadata"]["keywords"] = {
@@ -312,52 +250,121 @@ class IntegratedSearchPipeline:
                 "cache_hit": expand_cache_hit,
             }
 
-            # Step 3: Search — Hybrid (M1) or SQLite fallback (with Redis cache)
+            # 3) Search
             search_start = time.time()
             search_cache_hit = False
 
-            # Try cache first for search results
-            # [PATCH] cache key 직렬화: store_id + mode + keywords
-            effective_mode = "hybrid" if self._hybrid_ready() else "sqlite_fallback"
-            search_cache_key = {
-                "v": 2,
-                "store_id": store_id,
-                "mode": effective_mode,
-                "keywords": [str(k).strip() for k in search_keywords],
-            }
-            cached_search = cache_get("search", search_cache_key)
+            cached_search = cache_get("search", search_keywords)
             if cached_search is not None:
                 candidates = cached_search
+                logger.warning(
+                    "[CACHE HIT] search key=%r size=%s",
+                    search_keywords,
+                    len(cached_search) if hasattr(cached_search, "__len__") else "na",
+                )
                 search_cache_hit = True
-                logger.info(f"Cache HIT: search results for {search_keywords}")
-            elif effective_mode == "hybrid":
-                try:
-                    candidates = self._hybrid_search(search_keywords, result)
-                    # Cache the search results
-                    cache_set("search", search_cache_key, candidates)
-                except Exception as e:
-                    # [PATCH] hybrid runtime failure → open circuit + fallback
-                    logger.warning(f"[PATCH] Hybrid search failed → fallback to SQLite: {e}")
-                    self._hybrid_disabled_until = time.time() + self._breaker_cooldown_s
-                    result.setdefault("metadata", {}).setdefault("search", {})["hybrid_error"] = str(e)
-                    candidates = self._sqlite_search(search_keywords)
             else:
-                candidates = self._sqlite_search(search_keywords)
+                if _env_bool("FORCE_SQLITE", False):
+                    candidates = self._sqlite_search(search_keywords)
+                    result["metadata"]["search"] = {
+                        **result["metadata"].get("search", {}),
+                        "mode": "sqlite_fallback",
+                        "forced_sqlite": True,
+                    }
+                else:
+                    mode = _effective_search_mode()
+
+                    try:
+                        if mode == "bm25_only":
+                            if self._use_bm25:
+                                candidates = self._bm25_search(search_keywords, result, top_k=10)
+                            else:
+                                candidates = self._sqlite_search(search_keywords)
+
+                        elif mode in ("dense_only", "hybrid"):
+                            if not self._use_hybrid:
+                                candidates = self._bm25_search(search_keywords, result, top_k=10) if self._use_bm25 else self._sqlite_search(search_keywords)
+                            elif not _vendor_allowed():
+                                candidates = self._bm25_search(search_keywords, result, top_k=10) if self._use_bm25 else self._sqlite_search(search_keywords)
+                            else:
+                                query_text = " ".join(search_keywords)
+                                sr = self._hybrid_service.search(query_text, top_k=10, mode=mode)
+
+                                candidates = []
+                                for d in sr.docs:
+                                    payload = getattr(d, "payload", {}) or {}
+                                    title = payload.get("title") or payload.get("name") or getattr(d, "title", None) or getattr(d, "doc_id", "")
+                                    text = payload.get("text") or getattr(d, "text", "") or ""
+                                    candidates.append(
+                                        {
+                                            "id": getattr(d, "doc_id", None) or payload.get("doc_id") or title,
+                                            "name": title,
+                                            "text": text,
+                                            "searchable_desc": payload.get("bm25_text", text) or text,
+                                            "category": payload.get("category") or getattr(d, "category", None),
+                                            "price": payload.get("price", 0),
+                                            "image_url": payload.get("image_url", ""),
+                                            "score": getattr(d, "score", None),
+                                            "source": getattr(d, "source", "hybrid"),
+                                        }
+                                    )
+
+                                result["metadata"]["search"] = {
+                                    "hybrid_timing": sr.timing_ms,
+                                    "hybrid_metadata": sr.metadata,
+                                    "mode": mode,
+                                }
+
+                        else:
+                            if self._use_hybrid and _vendor_allowed():
+                                query_text = " ".join(search_keywords)
+                                sr = self._hybrid_service.search(query_text, top_k=10, mode="hybrid")
+                                candidates = []
+                                for d in sr.docs:
+                                    payload = getattr(d, "payload", {}) or {}
+                                    title = payload.get("title") or payload.get("name") or getattr(d, "title", None) or getattr(d, "doc_id", "")
+                                    text = payload.get("text") or getattr(d, "text", "") or ""
+                                    candidates.append(
+                                        {
+                                            "id": getattr(d, "doc_id", None) or payload.get("doc_id") or title,
+                                            "name": title,
+                                            "text": text,
+                                            "searchable_desc": payload.get("bm25_text", text) or text,
+                                            "category": payload.get("category") or getattr(d, "category", None),
+                                            "price": payload.get("price", 0),
+                                            "image_url": payload.get("image_url", ""),
+                                            "score": getattr(d, "score", None),
+                                            "source": getattr(d, "source", "hybrid"),
+                                        }
+                                    )
+                                result["metadata"]["search"] = {
+                                    "hybrid_timing": sr.timing_ms,
+                                    "hybrid_metadata": sr.metadata,
+                                    "mode": "hybrid",
+                                }
+                            else:
+                                candidates = self._bm25_search(search_keywords, result, top_k=10) if self._use_bm25 else self._sqlite_search(search_keywords)
+
+                    except Exception as e:
+                        logger.exception("Search pipeline error in mode=%s: %s", mode, e)
+                        candidates = self._bm25_search(search_keywords, result, top_k=10) if self._use_bm25 else self._sqlite_search(search_keywords)
+
+                cache_set("search", search_keywords, candidates)
 
             search_time = int((time.time() - search_start) * 1000)
 
             result["metadata"]["search"] = {
                 **result["metadata"].get("search", {}),
+                "mode": self.search_mode,
                 "candidates_count": len(candidates),
                 "keywords_used": search_keywords,
-                "mode": effective_mode,  # [PATCH] effective per-request mode
                 "cache_hit": search_cache_hit,
             }
 
-            # Step 4: M2 — Ambiguity Detection
+            # 4) Ambiguity
             ambiguity_start = time.time()
-
             category_spread = calculate_category_spread(candidates)
+
             ambiguity_result = detect_ambiguity(
                 item=nlu_result.slots.item,
                 attrs=nlu_result.slots.attrs,
@@ -365,6 +372,14 @@ class IntegratedSearchPipeline:
                 category_spread=category_spread,
                 nlu_needs_clarification=nlu_result.needs_clarification,
             )
+
+            if self.search_mode == "bm25_only" and len(candidates) >= 3:
+                majors = []
+                for c in candidates[:3]:
+                    major = c.get("category") or match_product_to_category(c["name"])[0]
+                    majors.append(major)
+                if len(set(majors)) == 1:
+                    ambiguity_result.is_ambiguous = False
 
             ambiguity_time = int((time.time() - ambiguity_start) * 1000)
 
@@ -376,38 +391,36 @@ class IntegratedSearchPipeline:
                 "category_spread": category_spread,
             }
 
-            # Step 4b: M2 — Handle ambiguity (clarification or fallback)
+            demo_bypass = (os.getenv("DEMO_CLARIFY_BYPASS") or "").strip().lower() in ("1", "true")
+
             if ambiguity_result.is_ambiguous:
-                if should_fallback(clarification_count):
-                    # 2-strike fallback: stop asking, show best-effort results
-                    logger.info(f"[M2] 2-strike fallback triggered (count={clarification_count})")
-                    result["is_fallback"] = True
-                    result["message"] = "정확한 상품을 찾기 어려워 가장 관련 있는 상품을 안내해 드립니다."
-                    # Continue to reranking with what we have
+                if demo_bypass and clarification_count >= 1:
+                    ambiguity_result.is_ambiguous = False
                 else:
-                    # Generate clarification question
-                    options = generate_clarification_options(candidates, item=nlu_result.slots.item)
-                    question = build_clarification_question(nlu_result.slots.item, options)
+                    if should_fallback(clarification_count):
+                        result["is_fallback"] = True
+                        result["message"] = "정확한 상품을 찾기 어려워 가장 관련 있는 상품을 안내해 드립니다."
+                    else:
+                        options = generate_clarification_options(candidates, item=nlu_result.slots.item)
+                        question = build_clarification_question(nlu_result.slots.item, options)
 
-                    result["needs_clarification"] = True
-                    result["clarification_question"] = question
-                    result["clarification_options"] = options
-                    result["clarification_count"] = clarification_count + 1
+                        result["needs_clarification"] = True
+                        result["clarification_question"] = question
+                        result["clarification_options"] = options
+                        result["clarification_count"] = clarification_count + 1
 
-                    # Still include partial results for context
-                    if candidates:
-                        result["top3"] = self._format_top3(candidates[:3])
+                        if candidates:
+                            result["top3"] = self._format_top3(candidates[:3])
 
-                    result["timing_ms"] = {
-                        "nlu": nlu_time,
-                        "expand": expand_time,
-                        "search": search_time,
-                        "ambiguity": ambiguity_time,
-                        "total": int((time.time() - start_time) * 1000),
-                    }
-                    return result
+                        result["timing_ms"] = {
+                            "nlu": nlu_time,
+                            "expand": expand_time,
+                            "search": search_time,
+                            "ambiguity": ambiguity_time,
+                            "total": int((time.time() - start_time) * 1000),
+                        }
+                        return result
 
-            # If no candidates found (and not handled by ambiguity)
             if not candidates:
                 result["message"] = f"'{query}' 관련 상품을 찾을 수 없습니다. 다른 키워드로 검색해 주세요."
                 result["timing_ms"] = {
@@ -418,55 +431,154 @@ class IntegratedSearchPipeline:
                     "total": int((time.time() - start_time) * 1000),
                 }
                 return result
-
-            # Step 5: Reranking with M2 enhanced reranker
-            rerank_start = time.time()
-
-            # Prepare candidates for reranking
-            rerank_candidates_list = []
-            for c in candidates:
-                rerank_candidates_list.append({
-                    "id": str(c["id"]),
-                    "name": c["name"],
-                    "desc": c.get("searchable_desc", c.get("text", c["name"])),
-                    "price": c.get("price", 0),
-                })
-
-            rerank_result = rerank_candidates(query, rerank_candidates_list)
-            rerank_time = int((time.time() - rerank_start) * 1000)
-
-            selected_id = rerank_result.get("selected_id")
-
-            result["metadata"]["rerank"] = {
-                "selected_id": selected_id,
-                "reason": rerank_result.get("reason", ""),
-                "confidence": rerank_result.get("confidence", 0.0),
-                "latency": rerank_result.get("latency", 0),
+            
+            selected_id: Optional[str] = None
+            rerank_time = 0
+                
+            # 5) Rerank (guard)
+            mode = (os.getenv("SEARCH_MODE") or "").strip().lower()
+            
+            env_rerank_mode = (os.getenv("RERANK_MODE") or "").strip().lower()
+            vendor_enabled = (os.getenv("VENDOR_ENABLED") or "").strip().lower() == "true"
+            
+            req_override = (rerank_mode_override or "").strip().lower()
+            rerank_mode = req_override or env_rerank_mode
+            
+            # voice/stt는 override가 없으면 local로 강제(Timeout 방지)
+            if (not req_override) and (input_type != "text"):
+                rerank_mode = "local"
+            
+            def _should_vendor_rerank_text(cands):
+                # 애매하면 True → vendor rerank 허용
+                if not cands or len(cands) < 2:
+                    return False
+            
+                # (A) 카테고리 분산(top3 대분류가 갈라지면 애매)
+                majors = []
+                for c in cands[:3]:
+                    major = c.get("category") or match_product_to_category(c.get("name", ""))[0]
+                    majors.append(major)
+                if len(set(majors)) >= 2:
+                    return True
+            
+                # (B) 점수 근접(top1/top2 점수차가 작으면 애매)
+                def _score(x):
+                    try:
+                        return float(x)
+                    except Exception:
+                        return None
+            
+                s1 = _score(cands[0].get("score"))
+                s2 = _score(cands[1].get("score"))
+                if s1 is None or s2 is None or s1 == 0:
+                    return False
+            
+                rel_gap = abs(s1 - s2) / (abs(s1) + 1e-9)
+                thr = float(os.getenv("RERANK_VENDOR_REL_GAP_MAX", "0.08") or "0.08")  # 8%
+                return rel_gap <= thr
+            
+            # ✅ text에서 vendor일 때만 게이팅 적용(override=vendor면 무조건 vendor)
+            if (
+                rerank_mode in ("vendor", "live")
+                and vendor_enabled
+                and input_type == "text"
+                and req_override != "vendor"
+            ):
+                if not _should_vendor_rerank_text(candidates):
+                    rerank_mode = "local"
+            
+            result["metadata"]["_debug_rerank_guard"] = {
+                "mode": mode,
+                "rerank_mode": rerank_mode,
+                "env_rerank_mode": env_rerank_mode,
+                "req_override": req_override,
+                "vendor_enabled": vendor_enabled,
+                "input_type": input_type,
             }
-
-            # Step 6: Location Mapping & Format Results
-            location_start = time.time()
-
-            top3 = self._format_top3(candidates[:3], selected_id=selected_id)
-
-            location_time = int((time.time() - location_start) * 1000)
-
-            # Step 7: QR Handover (placeholder)
-            top1_product = top3[0] if top3 else None
-            if top1_product:
-                result["top1_handover"] = {
-                    "qr_payload": f"https://daiso.app/product/{top1_product['product_id']}",
-                    "expires_in_sec": 120,
-                    "product_id": top1_product["product_id"],
-                    "product_name": top1_product["name"],
+            
+            # vendor 강제인데 실제 벤더 호출이 불가능하면 local로 강등(메타에 이유 남김)
+            if rerank_mode in ("vendor", "live") and (not _vendor_allowed()):
+                result["metadata"]["_debug_rerank_guard"]["forced_downgrade"] = "vendor_not_allowed"
+                rerank_mode = "local"
+            
+            # 5-1) Rerank (execute)
+            try:
+                # 기본: rerank 스킵 메타도 남겨서 "왜 비었는지" 추적 가능하게
+                result["metadata"]["rerank"] = {
+                    "mode": rerank_mode,
+                    "skipped": True,
+                    "reason": "not_executed_yet",
+                    "selected_id": None,
+                    "latency_ms": 0,
                 }
+
+                # off면 그대로 스킵
+                if rerank_mode in ("off", "none", ""):
+                    pass
+
+                # local / vendor 실행
+                else:
+                    rerank_start = time.time()
+                    
+                    logger.warning("[RERANK INPUT] mode=%s timeout=%s cand0_keys=%s",
+                    rerank_mode, os.getenv("RERANK_TIMEOUT", "6.0"),
+                    list((candidates[0] or {}).keys()) if candidates else None)
+                    
+                    rr = rerank_candidates(
+                        user_query=query,
+                        candidates=candidates,
+                        timeout=float(os.getenv("RERANK_TIMEOUT", "6.0") or "6.0"),
+                        mode_override=rerank_mode,
+                    )
+                
+                    rerank_time = int((time.time() - rerank_start) * 1000)
+
+                    # rr 가 dict든 pydantic이든 방어적으로 처리
+                    selected_id = None
+                    reranked = None
+                    rr_meta = {}
+
+                    if isinstance(rr, dict):
+                        selected_id = rr.get("selected_id") or rr.get("top1_id")
+                        reranked = rr.get("candidates") or rr.get("reranked") or rr.get("results")
+                        rr_meta = rr.get("metadata") or {}
+                    else:
+                        selected_id = getattr(rr, "selected_id", None) or getattr(rr, "top1_id", None)
+                        reranked = getattr(rr, "candidates", None) or getattr(rr, "reranked", None) or getattr(rr, "results", None)
+                        rr_meta = getattr(rr, "metadata", {}) or {}
+
+                    if reranked:
+                        candidates = reranked
+
+                    result["metadata"]["rerank"] = {
+                        "mode": rerank_mode,
+                        "skipped": False,
+                        "selected_id": selected_id,
+                        "latency_ms": rerank_time,
+                        "vendor_used": (rerank_mode in ("vendor", "live")),
+                        "details": rr_meta,
+                    }
+
+            except Exception as e:
+                logger.exception("Rerank failed: %s", e)
+                # rerank 실패해도 검색 결과는 계속 반환
+                result["metadata"]["rerank"] = {
+                    "mode": rerank_mode,
+                    "skipped": True,
+                    "reason": f"error:{type(e).__name__}",
+                    "selected_id": selected_id,
+                    "latency_ms": rerank_time,
+                }
+
+            # 6) Format top3
+            location_start = time.time()
+            top3 = self._format_top3(candidates[:3], selected_id=selected_id)
+            location_time = int((time.time() - location_start) * 1000)
 
             result["top3"] = top3
             if not result.get("message"):
                 result["message"] = f"'{query}' 관련 상품 {len(top3)}개를 찾았습니다."
 
-            # Timing summary
-            total_time = int((time.time() - start_time) * 1000)
             result["timing_ms"] = {
                 "nlu": nlu_time,
                 "expand": expand_time,
@@ -474,38 +586,26 @@ class IntegratedSearchPipeline:
                 "ambiguity": ambiguity_time,
                 "rerank": rerank_time,
                 "location": location_time,
-                "total": total_time,
+                "total": int((time.time() - start_time) * 1000),
             }
 
             return result
 
         except Exception as e:
-            # Error handling
             logger.error(f"Search pipeline error: {e}", exc_info=True)
             result["error"] = str(e)
             result["message"] = "검색 중 오류가 발생했습니다. 다시 시도해 주세요."
-            result["timing_ms"] = {
-                "total": int((time.time() - start_time) * 1000),
-            }
+            result["timing_ms"] = {"total": int((time.time() - start_time) * 1000)}
             return result
 
-    def _format_top3(
-        self,
-        candidates: List[Dict[str, Any]],
-        selected_id: Optional[str] = None,
-    ) -> List[Dict[str, Any]]:
-        """Format top 3 results with category mapping and rerank ordering."""
+    def _format_top3(self, candidates: List[Dict[str, Any]], selected_id: Optional[str] = None) -> List[Dict[str, Any]]:
         top3 = []
-        top1_product = None
-
         for idx, c in enumerate(candidates[:3]):
-            # Match category
             major, middle = match_product_to_category(c["name"])
-
             product_data = {
                 "product_id": c["id"],
                 "name": c["name"],
-                "price": c.get("price", 0),
+                "price": str(c.get("price", 0)),
                 "category_major": c.get("category", major),
                 "category_middle": middle,
                 "location_text": f"{c.get('category', major)} > {middle}",
@@ -513,64 +613,62 @@ class IntegratedSearchPipeline:
                 "rank": idx + 1,
                 "is_top1": False,
             }
+            top3.append(product_data)
 
-            # Mark top1 based on reranking
-            if selected_id and str(c["id"]) == str(selected_id):
-                product_data["is_top1"] = True
-                product_data["rank"] = 1
-                top1_product = product_data
-                top3.insert(0, product_data)  # Put at front
-            else:
-                top3.append(product_data)
+        if selected_id is not None:
+            for i, p in enumerate(top3):
+                if str(p["product_id"]) == str(selected_id):
+                    picked = top3.pop(i)
+                    picked["is_top1"] = True
+                    picked["rank"] = 1
+                    top3.insert(0, picked)
+                    break
 
-        # Ensure top3 has exactly 3 items (or less if not enough)
-        top3 = top3[:3]
-
-        # If no top1 selected by reranker, use first result
-        if not top1_product and top3:
+        if top3 and not any(p["is_top1"] for p in top3):
             top3[0]["is_top1"] = True
 
-        return top3
+        for i, p in enumerate(top3):
+            p["rank"] = i + 1
 
-    def _hybrid_search(self, keywords: List[str], result: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """M1: Hybrid search using Elasticsearch + Qdrant + RRF Fusion."""
-        # Join keywords for search query
-        query_text = " ".join(keywords)
+        return top3[:3]
 
-        search_result = self._hybrid_service.search(query_text, top_k=10, mode="hybrid")
+    def _bm25_search(self, keywords: List[str], result: Dict[str, Any], top_k: int = 10) -> List[Dict[str, Any]]:
+        query_text = " ".join(keywords or [])
+        logger.warning("[BM25] CALL query_text=%r top_k=%s", query_text, top_k)
 
-        # Convert ScoredDoc to candidate dict format
-        candidates = []
-        for doc in search_result.docs:
-            candidates.append({
-                "id": doc.doc_id,
-                "name": doc.title or doc.doc_id,
-                "text": doc.text,
-                "searchable_desc": doc.payload.get("bm25_text", doc.text),
-                "category": doc.category,
-                "price": doc.payload.get("price", 0),
-                "score": doc.score,
-                "source": doc.source,
-            })
+        sr = self._bm25_service.search(query_text, top_k=top_k, mode="bm25_only")
 
-        # Store hybrid search timing in metadata
+        candidates: List[Dict[str, Any]] = []
+        for doc in sr.docs:
+            payload = getattr(doc, "payload", {}) or {}
+            candidates.append(
+                {
+                    "id": doc.doc_id,
+                    "name": getattr(doc, "title", None) or doc.doc_id,
+                    "text": getattr(doc, "text", "") or "",
+                    "searchable_desc": payload.get("bm25_text", getattr(doc, "text", "") or ""),
+                    "category": getattr(doc, "category", None) or payload.get("category"),
+                    "price": payload.get("price", 0),
+                    "score": getattr(doc, "score", None),
+                    "source": getattr(doc, "source", "elastic"),
+                }
+            )
+
         result["metadata"]["search"] = {
-            "hybrid_timing": search_result.timing_ms,
-            "hybrid_metadata": search_result.metadata,
+            "hybrid_timing": sr.timing_ms,
+            "hybrid_metadata": sr.metadata,
+            "mode": "bm25_only",
         }
-
         return candidates
 
     def _sqlite_search(self, keywords: List[str]) -> List[Dict[str, Any]]:
-        """Fallback: SQLite LIKE search (M0 behavior)."""
-        candidates = []
+        candidates: List[Dict[str, Any]] = []
         for keyword in keywords:
             found = search_products(keyword)
             candidates.extend(found)
             if len(candidates) >= 10:
                 break
 
-        # Remove duplicates by product id
         seen_ids = set()
         unique_candidates = []
         for c in candidates:
@@ -581,12 +679,10 @@ class IntegratedSearchPipeline:
         return unique_candidates[:10]
 
 
-# Singleton instance
-_pipeline = None
+_pipeline: Optional[IntegratedSearchPipeline] = None
 
 
 def get_pipeline() -> IntegratedSearchPipeline:
-    """Get or create pipeline instance"""
     global _pipeline
     if _pipeline is None:
         _pipeline = IntegratedSearchPipeline()

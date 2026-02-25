@@ -136,6 +136,9 @@ export default function ListeningPage() {
                 session_id: state.sessionId,
                 history: state.history,
                 clarification_count: state.clarificationCount,
+                
+                // ✅ 디버그: 음성도 LLM rerank 강제
+                // rerank_mode_override: "vendor",
             });
 
             setSearchResponse(response);

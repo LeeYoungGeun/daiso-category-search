@@ -1,0 +1,7 @@
+services:
+  api:
+    environment:
+      SEARCH_MODE: "bm25_only"
+      VENDOR_ENABLED: "false"
+      VENDOR_SAMPLE_RATE: "0"
+      VENDOR_MAX_CALLS_PER_MIN: "0"

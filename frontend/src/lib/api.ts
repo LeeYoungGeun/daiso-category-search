@@ -32,6 +32,8 @@ export async function searchProducts(request: SearchRequest): Promise<SearchResp
     session_id: request.session_id,
     history: request.history,
     clarification_count: request.clarification_count || 0,
+    // 리랭크llm 강제  ✅ 추가
+    rerank_mode_override: request.rerank_mode_override,
   };
 
   const url = `${API_BASE}/v1/search`;
@@ -179,6 +181,7 @@ export class STTWebSocketClient {
   }
 
   private handleMessage(msg: STTServerMessage): void {
+    console.log("[STT recv]", msg.type, msg);
     switch (msg.type) {
       case "started":
         this.callbacks.onStarted?.(msg.run_id);
@@ -188,8 +191,8 @@ export class STTWebSocketClient {
         break;
       case "final":
         this.callbacks.onFinal?.(msg.text, msg.meta?.confidence ?? 0, msg.status);
-        this.stop();
-        break;
+        setTimeout(() => this.stop(), 700);
+        break; 
       case "error":
         this.callbacks.onError?.(msg.message);
         break;
